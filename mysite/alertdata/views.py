@@ -13,5 +13,9 @@ def verify_domain(request, file):
     response = HttpResponse(f, content_type='application/default')
     # response['Content_Type'] = 'text/plain'
     response['Content-Disposition'] = 'inline; filename="example.txt"'
-    # return HttpResponse(open())
     return HttpResponse(response)
+
+def getData(request):
+    if request.method == 'POST':
+        id = request.POST['id']
+        return HttpResponse(id)
