@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-import os
-
+import os, json
+from django.core.files.storage import default_storage
+import io
 from sympy import content
+from rest_framework.response import Response
 
 def hello(request, name):
     return HttpResponse("<b>Hello " + name + "</b>")
@@ -17,5 +19,11 @@ def verify_domain(request, file):
 
 def getData(request):
     if request.method == 'POST':
-        id = request.POST['id']
-        return HttpResponse(id)
+        # print(request.POST)
+        data = request.body
+        # file = file.decode()
+        print(type(data), data)
+        file = io.BytesIO(data)
+        workpath = os.path.dirname(os.path.abspath(__file__))
+        file_name = default_storage.save(workpath, file)
+        return Response(data=None)
