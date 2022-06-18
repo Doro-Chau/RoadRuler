@@ -26,5 +26,7 @@ def getData(request):
         file = io.BytesIO(data)
         workpath = os.path.dirname(os.path.abspath(__file__))
         file_name = default_storage.save(workpath, file)
-        # return Response(data=None)
-        return render(request, 'getDada.html')
+        str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
+        str = str.format("True")
+        return HttpResponse(str)
+        # return render(request, 'getData.html')
