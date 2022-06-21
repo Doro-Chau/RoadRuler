@@ -6,6 +6,8 @@ import io, folium
 from sympy import content
 from rest_framework.response import Response
 from .models import Aircraft, Shelter, ShelterDisaster
+from datetime import datetime
+import boto3
 
 def map(request):
     m = folium.Map(location = [23.467335, 120.966222], tiles = 'Stamen Terrain', zoom_start = 7, control_scale = True)
@@ -49,14 +51,19 @@ def verify_domain(request, file):
 
 def getData(request):
     if request.method == 'POST':
-        # print(request.POST)
+        #print(request)
         data = request.body
-        # file = file.decode()
-        print(type(data), data)
+        #print(data)
         file = io.BytesIO(data)
-        workpath = os.path.dirname(os.path.abspath(__file__))
-        file_name = default_storage.save(workpath, file)
+        #workpath = os.path.dirname(os.path.abspath(__file__))
+        #filename = default_storage.save(workpath, file)
+        
+        workpath = 'mymap/realtime_alert/'
+        now = datetime.now()
+        now = now.strftime("%Y%m%d-%H-%M-%S")
+        workpath = os.path.join(workpath, now)
+        client = boto3.client('s3', aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
+        client.put_object(Bucket='dorothybucket', Body=file, Key=workpath)
         str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
         str = str.format("True")
         return HttpResponse(str)
-        # return render(request, 'getData.html')
