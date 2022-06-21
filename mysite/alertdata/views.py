@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from .models import Aircraft, Shelter, ShelterDisaster
 from datetime import datetime
 import boto3
+import xml.etree.ElementTree as ET
 
 def map(request):
     m = folium.Map(location = [23.467335, 120.966222], tiles = 'Stamen Terrain', zoom_start = 7, control_scale = True)
@@ -63,7 +64,23 @@ def getData(request):
         now = now.strftime("%Y%m%d-%H-%M-%S")
         workpath = os.path.join(workpath, now)
         client = boto3.client('s3', aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
-        client.put_object(Bucket='dorothybucket', Body=file, Key=workpath)
+        #client.put_object(Bucket='dorothybucket', Body=file, Key=workpath)
+        root = ET.fromstring(data)
+        dict = {}
+        #df = pd.DataFrame()
+        for child in root:
+            if len(child) == 0:
+                #df[child.tag[38:]] = child.text
+                dict[child.tag[38:]] = child.text
+            else:
+                for i in range(len(child)):
+                    if len(child[i]) == 0:
+                        dict[child[i].tag[38:]] = child[i].text
+                    else:
+                        for j in range(len(child[i])):
+                            dict[child[i][j].tag[38:]] = child[i][j].text
+        print(dict)
+        #print(df)
         str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
         str = str.format("True")
         return HttpResponse(str)
