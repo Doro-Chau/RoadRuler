@@ -5,7 +5,7 @@ from django.core.files.storage import default_storage
 import io, folium
 from sympy import content
 from rest_framework.response import Response
-from .models import Aircraft, Shelter, ShelterDisaster
+from .models import Aircraft, Shelter, ShelterDisaster, RealtimeAlert
 from datetime import datetime
 import boto3
 import xml.etree.ElementTree as ET
@@ -79,7 +79,9 @@ def getData(request):
                     else:
                         for j in range(len(child[i])):
                             dict[child[i][j].tag[38:]] = child[i][j].text
+        
         print(dict)
+        RealtimeAlert.objects.create(**dict)
         #print(df)
         str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
         str = str.format("True")

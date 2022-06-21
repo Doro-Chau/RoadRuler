@@ -134,6 +134,36 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
+class RealtimeAlert(models.Model):
+    identifier = models.CharField(max_length=100, blank=True, null=True)
+    sender = models.CharField(max_length=80, blank=True, null=True)
+    sent = models.CharField(max_length=45, blank=True, null=True)
+    status = models.CharField(max_length=45, blank=True, null=True)
+    msgtype = models.CharField(db_column='msgType', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    source = models.CharField(max_length=45, blank=True, null=True)
+    scope = models.CharField(max_length=45, blank=True, null=True)
+    category = models.CharField(max_length=45, blank=True, null=True)
+    event = models.CharField(max_length=45, blank=True, null=True)
+    responsetype = models.CharField(db_column='responseType', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    urgency = models.CharField(max_length=45, blank=True, null=True)
+    severity = models.CharField(max_length=45, blank=True, null=True)
+    certainty = models.CharField(max_length=45, blank=True, null=True)
+    effective = models.CharField(max_length=45, blank=True, null=True)
+    expires = models.CharField(max_length=45, blank=True, null=True)
+    sendername = models.CharField(db_column='senderName', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    headline = models.CharField(max_length=255, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    instruction = models.CharField(max_length=255, blank=True, null=True)
+    web = models.CharField(max_length=255, blank=True, null=True)
+    areadesc = models.CharField(db_column='areaDesc', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    circle = models.CharField(max_length=45, blank=True, null=True)
+    realtime_alertcol = models.CharField(primary_key=True, max_length=45)
+
+    class Meta:
+        managed = False
+        db_table = 'realtime_alert'
+
+
 class Shelter(models.Model):
     shelter_id = models.IntegerField(primary_key=True)
     city = models.CharField(max_length=255, db_collation='utf8_general_ci', blank=True, null=True)
