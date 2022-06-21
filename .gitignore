@@ -127,7 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
+chromedriver.exe
 .mwb
 data source/
 dbbackup/
