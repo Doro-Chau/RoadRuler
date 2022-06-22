@@ -154,7 +154,7 @@ class RealtimeAlert(models.Model):
     web = models.CharField(max_length=255, blank=True, null=True)
     areadesc = models.CharField(db_column='areaDesc', max_length=45, blank=True, null=True)  # Field name made lowercase.
     circle = models.CharField(max_length=45, blank=True, null=True)
-    alert_id = models.CharField(primary_key=True, max_length=45)
+    alert_id = models.AutoField(primary_key=True)
 
     class Meta:
         managed = False
