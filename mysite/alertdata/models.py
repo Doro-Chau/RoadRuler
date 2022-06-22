@@ -20,6 +20,16 @@ class Aircraft(models.Model):
         unique_together = (('longtitude', 'latitude', 'city', 'capacity', 'address'),)
 
 
+class AlertLocation(models.Model):
+    alert = models.ForeignKey('RealtimeAlert', models.DO_NOTHING, blank=True, null=True)
+    location = models.CharField(max_length=100, blank=True, null=True)
+    alert_location_id = models.AutoField(primary_key=True)
+
+    class Meta:
+        managed = False
+        db_table = 'alert_location'
+
+
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
 
@@ -152,8 +162,6 @@ class RealtimeAlert(models.Model):
     headline = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
     web = models.CharField(max_length=255, blank=True, null=True)
-    areadesc = models.CharField(db_column='areaDesc', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    circle = models.CharField(max_length=45, blank=True, null=True)
     alert_id = models.AutoField(primary_key=True)
 
     class Meta:
