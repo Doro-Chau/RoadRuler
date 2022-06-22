@@ -64,13 +64,11 @@ def getData(request):
         now = now.strftime("%Y%m%d-%H-%M-%S")
         workpath = os.path.join(workpath, now)
         client = boto3.client('s3', aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
-        #client.put_object(Bucket='dorothybucket', Body=file, Key=workpath)
+        client.put_object(Bucket='dorothybucket', Body=file, Key=workpath)
         root = ET.fromstring(data)
         dict = {}
-        #df = pd.DataFrame()
         for child in root:
             if len(child) == 0:
-                #df[child.tag[38:]] = child.text
                 dict[child.tag[38:]] = child.text
             else:
                 for i in range(len(child)):
@@ -80,9 +78,10 @@ def getData(request):
                         for j in range(len(child[i])):
                             dict[child[i][j].tag[38:]] = child[i][j].text
         
-        print(dict)
+        dict = {k.lower(): v for k, v in dict.items()}
+        column_name = [x.name for x in RealtimeAlert._meta.get_fields()][:-1]
+        dict = {x: dict[x] for x in column_name}
         RealtimeAlert.objects.create(**dict)
-        #print(df)
         str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
         str = str.format("True")
         return HttpResponse(str)
