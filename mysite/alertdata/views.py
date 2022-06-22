@@ -52,12 +52,13 @@ def verify_domain(request, file):
     return HttpResponse(response)
 
 def getData(request):
+    print('get request time', datetime.now())
     if request.method == 'POST':
-        #print(request)
+        print('-----request: ', request)
         data = request.body
-        #print(data)
+        print('----data:', data)
         file = io.BytesIO(data)
-        print('datatype', data, type(data), 'filetype: ', file, type(file))
+        print('filetype: ', file, type(file))
         workpath = os.path.dirname(os.path.abspath(__file__))
         filename = default_storage.save(workpath, file)
         
@@ -68,9 +69,13 @@ def getData(request):
         now = datetime.now()
         now = now.strftime("%Y%m%d-%H-%M-%S")
         workpath = os.path.join(workpath, now)
-        client = boto3.client('s3', aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
-        response = client.put_object(Bucket='dorothybucket', Body=data, Key=workpath)
-        print('response--------', response)
+        print('workpath: ', workpath)
+        try:
+            client = boto3.client('s3', aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
+            response = client.put_object(Bucket='dorothybucket', Body=data, Key=workpath)
+            print('response--------', response)
+        except:
+            print('s3 error!!!!')
         root = ET.fromstring(data)
         dict = {}
         for child in root:
@@ -85,9 +90,18 @@ def getData(request):
                             dict[child[i][j].tag[38:]] = child[i][j].text
         
         dict = {k.lower(): v for k, v in dict.items()}
-        #column_name = [x.name for x in RealtimeAlert._meta.get_fields()][:-1]
-        #dict = {x: dict[x] for x in column_name}
-        #RealtimeAlert.objects.create(**dict)
+        column_name = [x.name for x in RealtimeAlert._meta.get_fields()][1:-1]
+        print(column_name)
+        try:
+            dict = {x: dict[x] for x in column_name}
+        except:
+            print('dict error({x: dict[x] for x in column_name})!!!')
+        try:    
+            RealtimeAlert.objects.create(**dict)
+        except:
+            print('RDS error!!!!')
+        alert_id = RealtimeAlert.objects.latest('alert_id').alert_id
+        print(alert_id)
         str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
         str = str.format("True")
         return HttpResponse(str)
