@@ -140,11 +140,9 @@ class RealtimeAlert(models.Model):
     sent = models.CharField(max_length=45, blank=True, null=True)
     status = models.CharField(max_length=45, blank=True, null=True)
     msgtype = models.CharField(db_column='msgType', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    source = models.CharField(max_length=45, blank=True, null=True)
     scope = models.CharField(max_length=45, blank=True, null=True)
     category = models.CharField(max_length=45, blank=True, null=True)
     event = models.CharField(max_length=45, blank=True, null=True)
-    responsetype = models.CharField(db_column='responseType', max_length=45, blank=True, null=True)  # Field name made lowercase.
     urgency = models.CharField(max_length=45, blank=True, null=True)
     severity = models.CharField(max_length=45, blank=True, null=True)
     certainty = models.CharField(max_length=45, blank=True, null=True)
@@ -153,11 +151,10 @@ class RealtimeAlert(models.Model):
     sendername = models.CharField(db_column='senderName', max_length=45, blank=True, null=True)  # Field name made lowercase.
     headline = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
-    instruction = models.CharField(max_length=255, blank=True, null=True)
     web = models.CharField(max_length=255, blank=True, null=True)
     areadesc = models.CharField(db_column='areaDesc', max_length=45, blank=True, null=True)  # Field name made lowercase.
     circle = models.CharField(max_length=45, blank=True, null=True)
-    realtime_alertcol = models.CharField(primary_key=True, max_length=45)
+    alert_id = models.CharField(primary_key=True, max_length=45)
 
     class Meta:
         managed = False
