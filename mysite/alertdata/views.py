@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 import os, json
+import hashlib
 from django.core.files.storage import default_storage
 import io, folium
 from sympy import content
@@ -56,15 +57,20 @@ def getData(request):
         data = request.body
         #print(data)
         file = io.BytesIO(data)
-        #workpath = os.path.dirname(os.path.abspath(__file__))
-        #filename = default_storage.save(workpath, file)
+        print('datatype', data, type(data), 'filetype: ', file, type(file))
+        workpath = os.path.dirname(os.path.abspath(__file__))
+        filename = default_storage.save(workpath, file)
+        
+        #md = hashlib.md5(data.encode('utf-8')).digest()
+        #contents_md5 = base64.b64encode(md).decode('utf-8')
         
         workpath = 'mymap/realtime_alert/'
         now = datetime.now()
         now = now.strftime("%Y%m%d-%H-%M-%S")
         workpath = os.path.join(workpath, now)
         client = boto3.client('s3', aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
-        client.put_object(Bucket='dorothybucket', Body=file, Key=workpath)
+        response = client.put_object(Bucket='dorothybucket', Body=data, Key=workpath)
+        print('response--------', response)
         root = ET.fromstring(data)
         dict = {}
         for child in root:
@@ -79,9 +85,9 @@ def getData(request):
                             dict[child[i][j].tag[38:]] = child[i][j].text
         
         dict = {k.lower(): v for k, v in dict.items()}
-        column_name = [x.name for x in RealtimeAlert._meta.get_fields()][:-1]
-        dict = {x: dict[x] for x in column_name}
-        RealtimeAlert.objects.create(**dict)
+        #column_name = [x.name for x in RealtimeAlert._meta.get_fields()][:-1]
+        #dict = {x: dict[x] for x in column_name}
+        #RealtimeAlert.objects.create(**dict)
         str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
         str = str.format("True")
         return HttpResponse(str)
