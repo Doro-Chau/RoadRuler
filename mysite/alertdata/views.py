@@ -99,11 +99,11 @@ def getData(request):
                                 #print('!!!!!!', child[i][j].text, child[i][j+1].text)
                                 dict_location[child[i][j].text] = child[i][j+1].text
                             #print('layer3: ', child[i][j].tag[38:], child[i][j].text, len(child[i][j]))
-                            if 'location' in dict_location:
+                            if 'location' in dict_location and j == 1:
                                 dict_location = {k.lower(): v for k, v in dict_location.items()}
                                 column_name = [x.name for x in AlertLocation._meta.get_fields()]
                                 #print(dict_location)
-                                dict_location = {x: dict_location[x] for x in column_name}
+                                dict_location = {x: dict_location[x] for x in dict_location.keys() if x in column_name}
                                 AlertLocation.objects.create(**dict_location)
         str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
         str = str.format("True")
