@@ -24,6 +24,7 @@ class AlertLocation(models.Model):
     alert = models.OneToOneField('RealtimeAlert', models.DO_NOTHING, primary_key=True)
     location = models.CharField(max_length=100)
     category = models.CharField(max_length=45, blank=True, null=True)
+    event = models.CharField(max_length=45, blank=True, null=True)
     urgency = models.CharField(max_length=45, blank=True, null=True)
     severity = models.CharField(max_length=45, blank=True, null=True)
     certainty = models.CharField(max_length=45, blank=True, null=True)
@@ -165,7 +166,6 @@ class RealtimeAlert(models.Model):
     status = models.CharField(max_length=45, blank=True, null=True)
     msgtype = models.CharField(db_column='msgType', max_length=45, blank=True, null=True)  # Field name made lowercase.
     scope = models.CharField(max_length=45, blank=True, null=True)
-    event = models.CharField(max_length=45, blank=True, null=True)
 
     class Meta:
         managed = False
