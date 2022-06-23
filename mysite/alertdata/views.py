@@ -52,54 +52,41 @@ def verify_domain(request, file):
     return HttpResponse(response)
 
 def getData(request):
-    print('get request time', datetime.now())
     if request.method == 'POST':
-        print('-----request: ', request)
         data = request.body
-        print('----data:', data)
         file = io.BytesIO(data)
-        print('filetype: ', file, type(file))
-        workpath = os.path.dirname(os.path.abspath(__file__))
-        filename = default_storage.save(workpath, file)
-        
-        #md = hashlib.md5(data.encode('utf-8')).digest()
-        #contents_md5 = base64.b64encode(md).decode('utf-8')
+        #workpath = os.path.dirname(os.path.abspath(__file__))
+        #filename = default_storage.save(workpath, file)
         
         workpath = 'mymap/realtime_alert/'
         now = datetime.now()
         now = now.strftime("%Y%m%d-%H-%M-%S")
         workpath = os.path.join(workpath, now)
-        print('workpath: ', workpath)
-        try:
-            client = boto3.client('s3', aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
-            response = client.put_object(Bucket='dorothybucket', Body=data, Key=workpath)
-            print('response--------', response)
-        except:
-            print('s3 error!!!!')
+        client = boto3.client('s3', aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
+        response = client.put_object(Bucket='dorothybucket', Body=data, Key=workpath)
+
         root = ET.fromstring(data)
         dict = {}
         for child in root:
             if len(child) == 0:
                 dict[child.tag[38:]] = child.text
+                print('layer1: ', child.tag[38:], child.text)
             else:
                 for i in range(len(child)):
                     if len(child[i]) == 0:
                         dict[child[i].tag[38:]] = child[i].text
+                        print('layer2: ', child[i].tag[38:], child[i].text)
                     else:
                         for j in range(len(child[i])):
                             dict[child[i][j].tag[38:]] = child[i][j].text
+                            print('layer3: ', child[i][j].tag[38:], child[i][j].text, len(child[i][j]))
         
         dict = {k.lower(): v for k, v in dict.items()}
         column_name = [x.name for x in RealtimeAlert._meta.get_fields()][1:-1]
         print(column_name)
-        try:
-            dict = {x: dict[x] for x in column_name}
-        except:
-            print('dict error({x: dict[x] for x in column_name})!!!')
-        try:    
-            RealtimeAlert.objects.create(**dict)
-        except:
-            print('RDS error!!!!')
+        dict = {x: dict[x] for x in column_name}
+            
+        RealtimeAlert.objects.create(**dict)
         alert_id = RealtimeAlert.objects.latest('alert_id').alert_id
         print(alert_id)
         str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
