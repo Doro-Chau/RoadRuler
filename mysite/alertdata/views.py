@@ -66,29 +66,33 @@ def getData(request):
         response = client.put_object(Bucket='dorothybucket', Body=data, Key=workpath)
 
         root = ET.fromstring(data)
-        dict = {}
+        dict_alert = {}
+        dict_location = {}
         for child in root:
             if len(child) == 0:
-                dict[child.tag[38:]] = child.text
+                dict_alert[child.tag[38:]] = child.text
                 print('layer1: ', child.tag[38:], child.text)
             else:
+                dict_alert = {k.lower(): v for k, v in dict_alert.items()}
+                column_name = [x.name for x in RealtimeAlert._meta.get_fields()][2:]
+                dict_alert = {x: dict_alert[x] for x in column_name}
+                RealtimeAlert.objects.create(**dict_alert)
+                alert_id = RealtimeAlert.objects.latest('alert_id').alert_id
                 for i in range(len(child)):
                     if len(child[i]) == 0:
-                        dict[child[i].tag[38:]] = child[i].text
+                        dict_location[child[i].tag[38:]] = child[i].text
                         print('layer2: ', child[i].tag[38:], child[i].text)
                     else:
                         for j in range(len(child[i])):
-                            dict[child[i][j].tag[38:]] = child[i][j].text
+                            dict_location[child[i][j].tag[38:]] = child[i][j].text
                             print('layer3: ', child[i][j].tag[38:], child[i][j].text, len(child[i][j]))
         
-        dict = {k.lower(): v for k, v in dict.items()}
-        column_name = [x.name for x in RealtimeAlert._meta.get_fields()][1:-1]
+        dict_location = {k.lower(): v for k, v in dict_location.items()}
+        column_name = [x.name for x in AlertLocation._meta.get_fields()][1:-1]
         print(column_name)
-        dict = {x: dict[x] for x in column_name}
+        dict_location = {x: dict_location[x] for x in column_name}
             
-        RealtimeAlert.objects.create(**dict)
-        alert_id = RealtimeAlert.objects.latest('alert_id').alert_id
-        print(alert_id)
+        #AlertLocation.objects.create(**dict_location)
         str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
         str = str.format("True")
         return HttpResponse(str)
