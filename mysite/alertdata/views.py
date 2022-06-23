@@ -6,7 +6,7 @@ from django.core.files.storage import default_storage
 import io, folium
 from sympy import content
 from rest_framework.response import Response
-from .models import Aircraft, Shelter, ShelterDisaster, RealtimeAlert
+from .models import Aircraft, Shelter, ShelterDisaster, RealtimeAlert, AlertLocation
 from datetime import datetime
 import boto3
 import xml.etree.ElementTree as ET
@@ -67,28 +67,40 @@ def getData(request):
 
         root = ET.fromstring(data)
         dict_alert = {}
-        dict_location = {}
         for child in root:
             if len(child) == 0:
                 dict_alert[child.tag[38:]] = child.text
-                print('layer1: ', child.tag[38:], child.text)
-            else:
-                dict_alert = {k.lower(): v for k, v in dict_alert.items()}
-                column_name = [x.name for x in RealtimeAlert._meta.get_fields()][2:]
-                dict_alert = {x: dict_alert[x] for x in column_name}
-                RealtimeAlert.objects.create(**dict_alert)
+        dict_alert = {k.lower(): v for k, v in dict_alert.items()}
+        column_name = [x.name for x in RealtimeAlert._meta.get_fields()][2:]
+        dict_alert = {x: dict_alert[x] for x in column_name}
+        RealtimeAlert.objects.create(**dict_alert)
+        
+        for child in root:
+            if len(child) != 0:
                 alert_id = RealtimeAlert.objects.latest('alert_id').alert_id
+                dict_location = {}
+                dict_location['alert'] = alert_id
                 for i in range(len(child)):
                     if len(child[i]) == 0:
                         dict_location[child[i].tag[38:]] = child[i].text
-                        print('layer2: ', child[i].tag[38:], child[i].text)
+                        #print('layer2: ', child[i].tag[38:], child[i].text)
+                        #print(dict_location)
                     else:
                         for j in range(len(child[i])):
-                            dict_location[child[i][j].tag[38:]] = child[i][j].text
-                            print('layer3: ', child[i][j].tag[38:], child[i][j].text, len(child[i][j]))
+                            if (child[i][j].tag[38:] != 'valueName') & (child[i][j].tag[38:] != 'value'):
+                                dict_location[child[i][j].tag[38:]] = child[i][j].text
+                                try:
+                                    dict_location['location'] = dict_location['areaDesc']
+                                except:
+                                    pass
+                            elif child[i][j].tag[38:] == 'valueName':
+                                print('!!!!!!', child[i][j].text, child[i][j+1].text)
+                                dict_location[child[i][j].text] = child[i][j+1].text
+                            #print('layer3: ', child[i][j].tag[38:], child[i][j].text, len(child[i][j]))
+                            #print(dict_location)
         
         dict_location = {k.lower(): v for k, v in dict_location.items()}
-        column_name = [x.name for x in AlertLocation._meta.get_fields()][1:-1]
+        column_name = [x.name for x in AlertLocation._meta.get_fields()]
         print(column_name)
         dict_location = {x: dict_location[x] for x in column_name}
             
