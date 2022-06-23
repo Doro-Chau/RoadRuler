@@ -34,7 +34,7 @@ class AlertLocation(models.Model):
     headline = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
     web = models.CharField(max_length=255, blank=True, null=True)
-    serverity_level = models.CharField(max_length=45, blank=True, null=True)
+    severity_level = models.CharField(max_length=45, blank=True, null=True)
     alert_criteria = models.CharField(max_length=45, blank=True, null=True)
     alert_color = models.CharField(max_length=45, blank=True, null=True)
 
