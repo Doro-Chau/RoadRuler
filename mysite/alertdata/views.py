@@ -12,37 +12,37 @@ import boto3
 import xml.etree.ElementTree as ET
 
 def map(request):
-    m = folium.Map(location = [23.467335, 120.966222], tiles = 'Stamen Terrain', zoom_start = 7, preferCanvas = True)
-    aircraft = Aircraft.objects.all()
+    # m = folium.Map(location = [23.467335, 120.966222], tiles = 'Stamen Terrain', zoom_start = 7, preferCanvas = True)
+    # aircraft = Aircraft.objects.all()
     
-    taoyuan_shelter = Shelter.objects.all().filter(city__contains='桃園市')
-    aircraft_location = [[x.longtitude, x.latitude] for x in aircraft]
-    taoyuan_shelter = [[x.longtitude, x.latitude] for x in taoyuan_shelter]
-    feature_group = folium.FeatureGroup(name = '桃園市', show = False)
+    # taoyuan_shelter = Shelter.objects.all().filter(city__contains='桃園市')
+    # aircraft_location = [[x.longtitude, x.latitude] for x in aircraft]
+    # taoyuan_shelter = [[x.longtitude, x.latitude] for x in taoyuan_shelter]
+    # feature_group = folium.FeatureGroup(name = '桃園市', show = False)
     
-    # taoyuan_shelter.add_to(feature_group)
+    # # taoyuan_shelter.add_to(feature_group)
     
-    for i in range(len(taoyuan_shelter)):
-        folium.Marker(location=taoyuan_shelter[i]).add_to(feature_group)
-        # folium.Marker(location=aircraft_location[i]).add_to(m)
-    feature_group.add_to(m)
+    # for i in range(len(taoyuan_shelter)):
+    #     folium.Marker(location=taoyuan_shelter[i]).add_to(feature_group)
+    #     # folium.Marker(location=aircraft_location[i]).add_to(m)
+    # feature_group.add_to(m)
+    # # folium.LayerControl().add_to(m)
+    
+    # water = ShelterDisaster.objects.all().filter(disaster='海嘯').select_related('shelter')
+    # # print(shelters)
+    # feature_group = folium.FeatureGroup(name='海嘯避難所', show = False)
+    # for shelter in water:
+    #     folium.Marker(location=[shelter.shelter.longtitude, shelter.shelter.latitude]).add_to(feature_group)
+    #     # print(shelter, shelter.shelter_id, shelter.shelter.longtitude)
+    # feature_group.add_to(m)
     # folium.LayerControl().add_to(m)
-    
-    water = ShelterDisaster.objects.all().filter(disaster='海嘯').select_related('shelter')
-    # print(shelters)
-    feature_group = folium.FeatureGroup(name='海嘯避難所', show = False)
-    for shelter in water:
-        folium.Marker(location=[shelter.shelter.longtitude, shelter.shelter.latitude]).add_to(feature_group)
-        # print(shelter, shelter.shelter_id, shelter.shelter.longtitude)
-    feature_group.add_to(m)
-    folium.LayerControl().add_to(m)
-    m = m._repr_html_()
-    context = {
-        'map': m,
-        'aircraft': aircraft
-    }
-    return render(request, 'map.html', context)
-
+    # m = m._repr_html_()
+    # context = {
+    #     'map': m,
+    #     'aircraft': aircraft
+    # }
+    # return render(request, 'map.html', context)
+    return render(request, 'map2.html')
 def verify_domain(request, file):
     workpath = os.path.dirname(os.path.abspath(__file__))
     f = open(os.path.join(workpath, file), 'r')
