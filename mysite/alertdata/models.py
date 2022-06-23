@@ -21,13 +21,26 @@ class Aircraft(models.Model):
 
 
 class AlertLocation(models.Model):
-    alert = models.ForeignKey('RealtimeAlert', models.DO_NOTHING, blank=True, null=True)
-    location = models.CharField(max_length=100, blank=True, null=True)
-    alert_location_id = models.AutoField(primary_key=True)
+    alert = models.OneToOneField('RealtimeAlert', models.DO_NOTHING, primary_key=True)
+    location = models.CharField(max_length=100)
+    category = models.CharField(max_length=45, blank=True, null=True)
+    urgency = models.CharField(max_length=45, blank=True, null=True)
+    severity = models.CharField(max_length=45, blank=True, null=True)
+    certainty = models.CharField(max_length=45, blank=True, null=True)
+    effective = models.CharField(max_length=45, blank=True, null=True)
+    expires = models.CharField(max_length=45, blank=True, null=True)
+    sendername = models.CharField(db_column='senderName', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    headline = models.CharField(max_length=255, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    web = models.CharField(max_length=255, blank=True, null=True)
+    serverity_level = models.CharField(max_length=45, blank=True, null=True)
+    alert_criteria = models.CharField(max_length=45, blank=True, null=True)
+    alert_color = models.CharField(max_length=45, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'alert_location'
+        unique_together = (('alert', 'location'),)
 
 
 class AuthGroup(models.Model):
@@ -145,24 +158,14 @@ class DjangoSession(models.Model):
 
 
 class RealtimeAlert(models.Model):
+    alert_id = models.AutoField(primary_key=True)
     identifier = models.CharField(max_length=100, blank=True, null=True)
     sender = models.CharField(max_length=80, blank=True, null=True)
     sent = models.CharField(max_length=45, blank=True, null=True)
     status = models.CharField(max_length=45, blank=True, null=True)
     msgtype = models.CharField(db_column='msgType', max_length=45, blank=True, null=True)  # Field name made lowercase.
     scope = models.CharField(max_length=45, blank=True, null=True)
-    category = models.CharField(max_length=45, blank=True, null=True)
     event = models.CharField(max_length=45, blank=True, null=True)
-    urgency = models.CharField(max_length=45, blank=True, null=True)
-    severity = models.CharField(max_length=45, blank=True, null=True)
-    certainty = models.CharField(max_length=45, blank=True, null=True)
-    effective = models.CharField(max_length=45, blank=True, null=True)
-    expires = models.CharField(max_length=45, blank=True, null=True)
-    sendername = models.CharField(db_column='senderName', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    headline = models.CharField(max_length=255, blank=True, null=True)
-    description = models.CharField(max_length=255, blank=True, null=True)
-    web = models.CharField(max_length=255, blank=True, null=True)
-    alert_id = models.AutoField(primary_key=True)
 
     class Meta:
         managed = False
