@@ -79,7 +79,7 @@ def getData(request):
             if len(child) != 0:
                 alert_id = RealtimeAlert.objects.latest('alert_id').alert_id
                 dict_location = {}
-                dict_location['alert'] = alert_id
+                dict_location['alert'] = RealtimeAlert.objects.latest('alert_id')
                 for i in range(len(child)):
                     if len(child[i]) == 0:
                         dict_location[child[i].tag[38:]] = child[i].text
@@ -87,24 +87,24 @@ def getData(request):
                         #print(dict_location)
                     else:
                         for j in range(len(child[i])):
+                            #print(child[i][j])
                             if (child[i][j].tag[38:] != 'valueName') & (child[i][j].tag[38:] != 'value'):
+                                #print(child[i][j])
                                 dict_location[child[i][j].tag[38:]] = child[i][j].text
                                 try:
                                     dict_location['location'] = dict_location['areaDesc']
                                 except:
                                     pass
                             elif child[i][j].tag[38:] == 'valueName':
-                                print('!!!!!!', child[i][j].text, child[i][j+1].text)
+                                #print('!!!!!!', child[i][j].text, child[i][j+1].text)
                                 dict_location[child[i][j].text] = child[i][j+1].text
                             #print('layer3: ', child[i][j].tag[38:], child[i][j].text, len(child[i][j]))
-                            #print(dict_location)
-        
-        dict_location = {k.lower(): v for k, v in dict_location.items()}
-        column_name = [x.name for x in AlertLocation._meta.get_fields()]
-        print(column_name)
-        dict_location = {x: dict_location[x] for x in column_name}
-            
-        #AlertLocation.objects.create(**dict_location)
+                            if 'location' in dict_location:
+                                dict_location = {k.lower(): v for k, v in dict_location.items()}
+                                column_name = [x.name for x in AlertLocation._meta.get_fields()]
+                                #print(dict_location)
+                                dict_location = {x: dict_location[x] for x in column_name}
+                                AlertLocation.objects.create(**dict_location)
         str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
         str = str.format("True")
         return HttpResponse(str)
