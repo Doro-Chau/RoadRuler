@@ -21,8 +21,8 @@ class Aircraft(models.Model):
 
 
 class AlertLocation(models.Model):
-    alert = models.OneToOneField('RealtimeAlert', models.DO_NOTHING, primary_key=True)
-    location = models.CharField(max_length=100)
+    alert = models.ForeignKey('RealtimeAlert', models.DO_NOTHING)
+    location = models.CharField(primary_key=True, max_length=100)
     category = models.CharField(max_length=45, blank=True, null=True)
     event = models.CharField(max_length=45, blank=True, null=True)
     urgency = models.CharField(max_length=45, blank=True, null=True)
@@ -41,7 +41,7 @@ class AlertLocation(models.Model):
     class Meta:
         managed = False
         db_table = 'alert_location'
-        unique_together = (('alert', 'location'),)
+        unique_together = (('location', 'alert'),)
 
 
 class AuthGroup(models.Model):
