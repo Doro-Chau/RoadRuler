@@ -210,3 +210,86 @@ class ShelterDisaster(models.Model):
         managed = False
         db_table = 'shelter_disaster'
         unique_together = (('shelter', 'disaster'),)
+
+
+class TrafficCctv(models.Model):
+    update_time = models.CharField(max_length=80, blank=True, null=True)
+    city = models.CharField(max_length=45)
+    cctvid = models.CharField(db_column='CCTVID', primary_key=True, max_length=45)  # Field name made lowercase.
+    linkid = models.CharField(db_column='LinkID', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    videostreamurl = models.CharField(db_column='VideoStreamURL', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    locationtype = models.CharField(db_column='LocationType', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    positionlon = models.CharField(db_column='PositionLon', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    positionlat = models.CharField(db_column='PositionLat', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    surveillancetype = models.CharField(db_column='SurveillanceType', max_length=80, blank=True, null=True)  # Field name made lowercase.
+    roadid = models.CharField(db_column='RoadID', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    roadname = models.CharField(db_column='RoadName', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    roadclass = models.CharField(db_column='RoadClass', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    roaddirection = models.CharField(db_column='RoadDirection', max_length=45, blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'traffic_cctv'
+        unique_together = (('cctvid', 'city'),)
+
+
+class TrafficLink(models.Model):
+    update_time = models.CharField(max_length=80, blank=True, null=True)
+    linkid = models.CharField(db_column='LinkID', primary_key=True, max_length=45)  # Field name made lowercase.
+    roadname = models.CharField(db_column='RoadName', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    startpoint = models.CharField(db_column='StartPoint', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    endpoint = models.CharField(db_column='EndPoint', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    city = models.CharField(max_length=45, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'traffic_link'
+
+
+class TrafficLivevd(models.Model):
+    update_time = models.CharField(max_length=80, blank=True, null=True)
+    city = models.CharField(max_length=45, blank=True, null=True)
+    vdid = models.CharField(db_column='VDID', primary_key=True, max_length=45)  # Field name made lowercase.
+    linkid = models.ForeignKey(TrafficLink, models.DO_NOTHING, db_column='LinkID', blank=True, null=True)  # Field name made lowercase.
+    laneid = models.IntegerField(db_column='LaneID', blank=True, null=True)  # Field name made lowercase.
+    lanetype = models.IntegerField(db_column='LaneType', blank=True, null=True)  # Field name made lowercase.
+    speed = models.CharField(db_column='Speed', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    occupancy = models.CharField(db_column='Occupancy', max_length=45, blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'traffic_liveVD'
+
+
+class TrafficLivecity(models.Model):
+    update_time = models.CharField(max_length=80, blank=True, null=True)
+    city = models.CharField(max_length=45, blank=True, null=True)
+    sectionid = models.OneToOneField('TrafficSection', models.DO_NOTHING, db_column='SectionID', primary_key=True)  # Field name made lowercase.
+    traveltime = models.CharField(db_column='TravelTime', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    travelspeed = models.CharField(db_column='TravelSpeed', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    congestionlevelid = models.CharField(db_column='CongestionLevelID', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    congestionlevel = models.CharField(db_column='CongestionLevel', max_length=45, blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'traffic_livecity'
+
+
+class TrafficSection(models.Model):
+    update_time = models.CharField(max_length=80, blank=True, null=True)
+    sectionid = models.CharField(db_column='SectionID', primary_key=True, max_length=45)  # Field name made lowercase.
+    city = models.CharField(max_length=45, blank=True, null=True)
+    geometry = models.TextField(db_column='Geometry', blank=True, null=True)  # Field name made lowercase.
+    sectionname = models.CharField(db_column='SectionName', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    roadid = models.CharField(db_column='RoadID', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    roadname = models.CharField(db_column='RoadName', max_length=80, blank=True, null=True)  # Field name made lowercase.
+    roadclass = models.CharField(db_column='RoadClass', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    roaddirection = models.CharField(db_column='RoadDirection', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    roadsection = models.CharField(db_column='RoadSection', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    sectionlength = models.CharField(db_column='SectionLength', max_length=80, blank=True, null=True)  # Field name made lowercase.
+    sectionstart = models.CharField(db_column='SectionStart', max_length=80, blank=True, null=True)  # Field name made lowercase.
+    sectionend = models.CharField(db_column='SectionEnd', max_length=45, blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'traffic_section'
