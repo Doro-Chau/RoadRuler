@@ -28,8 +28,8 @@ class AlertLocation(models.Model):
     urgency = models.CharField(max_length=45, blank=True, null=True)
     severity = models.CharField(max_length=45, blank=True, null=True)
     certainty = models.CharField(max_length=45, blank=True, null=True)
-    effective = models.CharField(max_length=45, blank=True, null=True)
-    expires = models.CharField(max_length=45, blank=True, null=True)
+    effective = models.DateTimeField(blank=True, null=True)
+    expires = models.DateTimeField(blank=True, null=True)
     sendername = models.CharField(db_column='senderName', max_length=45, blank=True, null=True)  # Field name made lowercase.
     headline = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
@@ -158,6 +158,27 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
+class Parkinglot(models.Model):
+    update_time = models.CharField(max_length=45, blank=True, null=True)
+    id = models.CharField(primary_key=True, max_length=30)
+    area = models.CharField(max_length=45, blank=True, null=True)
+    name = models.CharField(max_length=45, blank=True, null=True)
+    summary = models.CharField(max_length=255, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    tel = models.CharField(max_length=45, blank=True, null=True)
+    payex = models.CharField(max_length=255, blank=True, null=True)
+    servicetime = models.CharField(db_column='serviceTime', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    totalcar = models.IntegerField(blank=True, null=True)
+    availablecar = models.IntegerField(blank=True, null=True)
+    fareinfo = models.CharField(db_column='FareInfo', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    entrancelat = models.CharField(db_column='EntranceLat', max_length=45)  # Field name made lowercase.
+    entrancelon = models.CharField(db_column='EntranceLon', max_length=45)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'parkinglot'
+
+
 class RealtimeAlert(models.Model):
     alert_id = models.AutoField(primary_key=True)
     identifier = models.CharField(max_length=100, blank=True, null=True)
@@ -250,15 +271,16 @@ class TrafficLivevd(models.Model):
     update_time = models.CharField(max_length=80, blank=True, null=True)
     city = models.CharField(max_length=45, blank=True, null=True)
     vdid = models.CharField(db_column='VDID', primary_key=True, max_length=45)  # Field name made lowercase.
-    linkid = models.ForeignKey(TrafficLink, models.DO_NOTHING, db_column='LinkID', blank=True, null=True)  # Field name made lowercase.
-    laneid = models.IntegerField(db_column='LaneID', blank=True, null=True)  # Field name made lowercase.
+    linkid = models.ForeignKey(TrafficLink, models.DO_NOTHING, db_column='LinkID')  # Field name made lowercase.
+    laneid = models.IntegerField(db_column='LaneID')  # Field name made lowercase.
     lanetype = models.IntegerField(db_column='LaneType', blank=True, null=True)  # Field name made lowercase.
-    speed = models.CharField(db_column='Speed', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    speed = models.DecimalField(db_column='Speed', max_digits=10, decimal_places=0, blank=True, null=True)  # Field name made lowercase.
     occupancy = models.CharField(db_column='Occupancy', max_length=45, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'traffic_liveVD'
+        unique_together = (('vdid', 'laneid', 'linkid'),)
 
 
 class TrafficLivecity(models.Model):

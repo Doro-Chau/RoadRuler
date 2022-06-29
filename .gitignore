@@ -5,7 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+mysite/node_modules/
 # Distribution / packaging
 .Python
 build/
@@ -133,3 +133,5 @@ data source/
 dbbackup/
 4D1B500D11E7DF4C032DD303CEEA1A32.txt
 mysite/static/
+mysite/package-lock.json
+mysite/package.json

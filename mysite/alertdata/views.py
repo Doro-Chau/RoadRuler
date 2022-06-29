@@ -1,13 +1,14 @@
+from turtle import position
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-import os, json, requests
+import os, json, requests, sys
 from numpy import append
-import hashlib
+import hashlib, math
 from django.core.files.storage import default_storage
 import io, folium
 from sympy import content
 from rest_framework.response import Response
-from .models import Aircraft, Shelter, ShelterDisaster, RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink
+from .models import Aircraft, Shelter, ShelterDisaster, RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot
 from datetime import datetime
 import boto3
 import xml.etree.ElementTree as ET
@@ -15,76 +16,151 @@ import pandas as pd
 
 def map(request):
     
-    # print(data3['UpdateTime'], data3['UpdateInterval'], data3['SrcUpdateTime'], data3['SrcUpdateInterval'], data3['AuthorityCode'])
-    # for i in range(len(data3['VDs'])):
-    #     print(data3['VDs'][i]['PositionLon'], data3['VDs'][0]['PositionLat'])
-    #     print(data3['VDs'][i].keys())
-    # for i in range(3):
-    #     print(data['LiveTraffics'][i])
-    # print(data2['Sections'][0]['SectionStart'], data2['Sections'][0]['SectionEnd'])
+    # taoyuan_shelter = Shelter.objects.all().filter(city__contains='桃園市')
+    # aircraft_location = [[x.longtitude, x.latitude] for x in aircraft]
+    # taoyuan_shelter = [[x.longtitude, x.latitude] for x in taoyuan_shelter]
+    # feature_group = folium.FeatureGroup(name = '桃園市', show = False)
     
-    m = folium.Map(location = [23.467335, 120.966222], tiles = 'Stamen Terrain', zoom_start = 7, preferCanvas = True)
-    # print(len(data2['Sections']))
-    # for i in range(len(data2['Section'])):
-    #     print(i, data2['Sections'][i])
-    #     print(data2['Sections'][i]['SectionStart']['PositionLat'], data2['Sections'][i]['SectionStart']['PositionLon']), (data2['Sections'][i]['SectionEnd']['PositionLat'], data2['Sections'][i]['SectionEnd']['PositionLon'])
-    #     folium.PolyLine([(data2['Sections'][i]['SectionStart']['PositionLat'], data2['Sections'][i]['SectionStart']['PositionLon']), (data2['Sections'][i]['SectionEnd']['PositionLat'], data2['Sections'][i]['SectionEnd']['PositionLon'])]).add_to(m)
-    aircraft = Aircraft.objects.all()
+    # # taoyuan_shelter.add_to(feature_group)
     
-    taoyuan_shelter = Shelter.objects.all().filter(city__contains='桃園市')
-    aircraft_location = [[x.longtitude, x.latitude] for x in aircraft]
-    taoyuan_shelter = [[x.longtitude, x.latitude] for x in taoyuan_shelter]
-    feature_group = folium.FeatureGroup(name = '桃園市', show = False)
+    # for i in range(len(taoyuan_shelter)):
+    #     folium.Marker(location=taoyuan_shelter[i]).add_to(feature_group)
+    #     # folium.Marker(location=aircraft_location[i]).add_to(m)
+    # feature_group.add_to(m)
+    # # folium.LayerControl().add_to(m)
     
-    # taoyuan_shelter.add_to(feature_group)
-    
-    for i in range(len(taoyuan_shelter)):
-        folium.Marker(location=taoyuan_shelter[i]).add_to(feature_group)
-        # folium.Marker(location=aircraft_location[i]).add_to(m)
-    feature_group.add_to(m)
+    # water = ShelterDisaster.objects.all().filter(disaster='海嘯').select_related('shelter')
+    # # print(shelters)
+    # feature_group = folium.FeatureGroup(name='海嘯避難所', show = False)
+    # for shelter in water:
+    #     folium.Marker(location=[shelter.shelter.longtitude, shelter.shelter.latitude]).add_to(feature_group)
+    #     # print(shelter, shelter.shelter_id, shelter.shelter.longtitude)
+    # feature_group.add_to(m)
     # folium.LayerControl().add_to(m)
-    
-    water = ShelterDisaster.objects.all().filter(disaster='海嘯').select_related('shelter')
-    # print(shelters)
-    feature_group = folium.FeatureGroup(name='海嘯避難所', show = False)
-    for shelter in water:
-        folium.Marker(location=[shelter.shelter.longtitude, shelter.shelter.latitude]).add_to(feature_group)
-        # print(shelter, shelter.shelter_id, shelter.shelter.longtitude)
-    feature_group.add_to(m)
-    folium.LayerControl().add_to(m)
-    m = m._repr_html_()
-    context = {
-        'map': m,
-        'aircraft': aircraft
-    }
+    # m = m._repr_html_()
+    # context = {
+    #     'map': m,
+    #     'aircraft': aircraft
+    # }
     # return render(request, 'map.html', context)
     return render(request, 'map2.html')
 
+def renderCctv(request):
+    cctv = TrafficCctv.objects.filter(videostreamurl__isnull=False).filter(positionlat__isnull=False).filter(positionlon__isnull=False)
+    cctv = [[x.cctvid, x.city, x.videostreamurl, x.positionlat, x.positionlon] for x in cctv]
+    return HttpResponse(cctv)
+
+def renderLivevd(request):
+    df_livevd = pd.DataFrame(list(TrafficLivevd.objects.all().values()))
+    df_link = pd.DataFrame(list(TrafficLink.objects.all().values()))
+    df_livevd.rename(columns={'linkid_id':'linkid'}, inplace=True)
+    df_livevd = df_livevd.groupby('linkid').agg({'city':'first', 'vdid': 'first', 'speed':'mean'}).reset_index()
+    df_merge = df_link.merge(df_livevd, how = 'inner', on=['linkid', 'city'])
+    df_merge[['startlon', 'startlat']] = df_merge['startpoint'].str.split(',', expand=True)
+    df_merge[['endlon', 'endlat']] = df_merge['endpoint'].str.split(',', expand=True)
+    df_merge = df_merge.drop(columns=['update_time', 'startpoint', 'endpoint'])
+    merge = df_merge.values.tolist()
+    return HttpResponse(merge)
+
+def renderLivecity(request):
+    df_livecity = pd.DataFrame(list(TrafficLivecity.objects.all().values()))
+    df_section = pd.DataFrame(list(TrafficSection.objects.all().values()))
+    df_livecity.rename(columns={'sectionid_id':'sectionid'}, inplace=True)
+    df_merge = df_livecity.merge(df_section, how='inner', on=['sectionid', 'city'])
+    df_merge = df_merge[['city', 'sectionid', 'travelspeed', 'geometry']]
+    merge = df_merge.values.tolist()
+    return HttpResponse(merge)
+
+def renderAlert(request):
+    df_alert = pd.DataFrame(list(AlertLocation.objects.filter(expires__gt=datetime.now()).values()))
+    df_alert = df_alert.drop(columns=['alert_id', 'severity_level', 'alert_critiria'])
+    df_alert.to_csv('a.csv')
+    print(df_alert)
+    return HttpResponse(df_alert)
+
 def getTraffic(request):
     url = "https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/VD/City/Taipei"
-    url3 = "https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/City/Taichung"
-    url4 = "https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/Taichung"
-    url7 = "https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/CongestionLevel/City/Taipei"
-    url2 = 'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/SectionLink/City/Taichung'
-    url5 = "https://tdx.transportdata.tw/api/basic/v2/Road/Link/LinkID/6350570600020H"
     # data = getApiResponse(request, url)
     # data = json.loads(data.content.decode("utf-8"))
-    # data3 = getApiResponse(request, url3)
-    # data3 = json.loads(data3.content.decode("utf-8"))
-    # data4 = getApiResponse(request, url4)
-    # data4 = json.loads(data4.content.decode("utf-8"))
-    # data7 = getApiResponse(request, url7)
-    # data7 = json.loads(data7.content.decode("utf-8"))
-    # print(data.keys())
-    # print(data['VDs'][0].keys())
-    # print(data3.keys())
-    # print(data3['LiveTraffics'])
-    # print(data7.keys())
-    # print(data7['CongestionLevels'][0].keys())
-    # print(data4.keys())
-    # print(data4['VDLives'][0].keys())
     
-    return getApiResponse(request, url5)
+    return getApiResponse(request, url)
+
+def twd97_to_lonlat(x, y):
+    a = 6378137
+    b = 6356752.314245
+    long_0 = 121 * math.pi / 180.0
+    k0 = 0.9999
+    dx = 250000
+    dy = 0
+    e = math.pow((1-math.pow(b, 2)/math.pow(a,2)), 0.5)
+    x -= dx
+    y -= dy
+    M = y / k0
+    mu = M / ( a*(1-math.pow(e, 2)/4 - 3*math.pow(e,4)/64 - 5 * math.pow(e, 6)/256))
+    e1 = (1.0 - pow((1   - pow(e, 2)), 0.5)) / (1.0 +math.pow((1.0 -math.pow(e,2)), 0.5))
+    j1 = 3*e1/2-27*math.pow(e1,3)/32
+    j2 = 21 * math.pow(e1,2)/16 - 55 * math.pow(e1, 4)/32
+    j3 = 151 * math.pow(e1, 3)/96
+    j4 = 1097 * math.pow(e1, 4)/512
+    fp = mu + j1 * math.sin(2*mu) + j2 * math.sin(4* mu) + j3 * math.sin(6*mu) + j4 * math.sin(8* mu)
+    e2 = math.pow((e*a/b),2)
+    c1 = math.pow(e2*math.cos(fp),2)
+    t1 = math.pow(math.tan(fp),2)
+    r1 = a * (1-math.pow(e,2)) / math.pow( (1-math.pow(e,2)* math.pow(math.sin(fp),2)), (3/2))
+    n1 = a / math.pow((1-math.pow(e,2)*math.pow(math.sin(fp),2)),0.5)
+    d = x / (n1*k0)
+    q1 = n1* math.tan(fp) / r1
+    q2 = math.pow(d,2)/2
+    q3 = ( 5 + 3 * t1 + 10 * c1 - 4 * math.pow(c1,2) - 9 * e2 ) * math.pow(d,4)/24
+    q4 = (61 + 90 * t1 + 298 * c1 + 45 * math.pow(t1,2) - 3 * math.pow(c1,2) - 252 * e2) * math.pow(d,6)/720
+    lat = fp - q1 * (q2 - q3 + q4)
+    q5 = d
+    q6 = (1+2*t1+c1) * math.pow(d,3) / 6
+    q7 = (5 - 2 * c1 + 28 * t1 - 3 * math.pow(c1,2) + 8 * e2 + 24 * math.pow(t1,2)) * math.pow(d,5) / 120
+    lon = long_0 + (q5 - q6 + q7) / math.cos(fp)
+    lat = (lat*180) / math.pi
+    lon = (lon*180) / math.pi
+    return [lat, lon]
+
+def getParking(request):
+    Parkinglot.objects.all().delete()
+    # parking lot information
+    parkingurl = "https://tcgbusfs.blob.core.windows.net/blobtcmsv/TCMSV_alldesc.json"
+    response_park = requests.get(parkingurl)
+    parkdata = response_park.json()['data']
+    update_time = parkdata['UPDATETIME']
+    df_park = pd.DataFrame(parkdata['park'])
+    df_park["tw97x"] = pd.to_numeric(df_park["tw97x"])
+    df_park["tw97y"] = pd.to_numeric(df_park["tw97y"])
+    df_park['update_time'] = update_time
+    df_park = df_park[df_park['tw97x']>100]
+    df_park = df_park.reset_index(drop=True)
+    df_park[['entrancelat', 'entrancelon']] = ''
+    for i in range(len(df_park)):
+        df_park['entrancelat'][i], df_park['entrancelon'][i] = twd97_to_lonlat(df_park['tw97x'][i], df_park['tw97y'][i])
+
+    # realtime available lot
+    liveurl = "https://tcgbusfs.blob.core.windows.net/blobtcmsv/TCMSV_allavailable.json"
+    response = requests.get(liveurl)
+    livedata = response.json()['data']
+    update_time = livedata['UPDATETIME']
+    df_live = pd.DataFrame(livedata['park'])
+    
+    df_merge = df_park.merge(df_live, how='left', on='id')
+    df_merge = df_merge[['update_time', 'id', 'area', 'name', 'summary', 'address', 'tel', 'payex', 'serviceTime', 'totalcar', 'availablecar', 'FareInfo', 'entrancelat', 'entrancelon']]
+    df_merge = df_merge.where(pd.notnull(df_merge), 99999)
+    df_merge = df_merge[df_merge['entrancelat'] > 20]
+    df_merge['name'] = df_merge['name'].str.replace(' ', '')
+    bulk_list = [Parkinglot(x['update_time'], x['id'], x['area'], x['name'], x['summary'], x['address'], x['tel'], x['payex'], x['serviceTime'], x['totalcar'], x['availablecar'], x['FareInfo'], x['entrancelat'], x['entrancelon']) for index, x in df_merge.iterrows()]
+    Parkinglot.objects.bulk_create(bulk_list)
+    return HttpResponse(df_merge)
+
+def renderParking(request):
+    df_parking = pd.DataFrame(list(Parkinglot.objects.all().values()))
+    df_parking = df_parking[['name', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon']]
+    # df_parking = df_parking.drop(columns=['update_time', 'id', 'fareinfo', 'payex', 'address'])
+    parking = df_parking.values.tolist()
+    return HttpResponse(parking)
 
 def getLive(request):
     TrafficLivecity.objects.all().delete()
