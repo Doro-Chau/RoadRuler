@@ -1,10 +1,9 @@
 from django.urls import path, include
 from . import views
-from .views import getData, getParking, verify_domain
 
 urlpatterns = [
-    path('.well-known/pki-validation/<file>', verify_domain),
-    path('getData', getData),
+    path('.well-known/pki-validation/<file>', views.verify_domain),
+    path('getData', views.getData),
     path('map', views.map),
     path('getTraffic', views.getTraffic),
     path('getCCTV', views.getCCTV),
