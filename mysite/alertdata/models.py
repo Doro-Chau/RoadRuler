@@ -262,23 +262,15 @@ class ShelterDisaster(models.Model):
 
 class TrafficCctv(models.Model):
     update_time = models.CharField(max_length=80, blank=True, null=True)
-    city = models.CharField(max_length=45)
     cctvid = models.CharField(db_column='CCTVID', primary_key=True, max_length=45)  # Field name made lowercase.
-    linkid = models.CharField(db_column='LinkID', max_length=45, blank=True, null=True)  # Field name made lowercase.
     videostreamurl = models.CharField(db_column='VideoStreamURL', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    locationtype = models.CharField(db_column='LocationType', max_length=45, blank=True, null=True)  # Field name made lowercase.
     positionlon = models.CharField(db_column='PositionLon', max_length=100, blank=True, null=True)  # Field name made lowercase.
     positionlat = models.CharField(db_column='PositionLat', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    surveillancetype = models.CharField(db_column='SurveillanceType', max_length=80, blank=True, null=True)  # Field name made lowercase.
-    roadid = models.CharField(db_column='RoadID', max_length=45, blank=True, null=True)  # Field name made lowercase.
     roadname = models.CharField(db_column='RoadName', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    roadclass = models.CharField(db_column='RoadClass', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    roaddirection = models.CharField(db_column='RoadDirection', max_length=45, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'traffic_cctv'
-        unique_together = (('cctvid', 'city'),)
 
 
 class TrafficLink(models.Model):

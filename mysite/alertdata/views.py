@@ -16,34 +16,6 @@ from django.db import transaction
 from pymongo import MongoClient
 
 def map(request):
-    
-    # taoyuan_shelter = Shelter.objects.all().filter(city__contains='桃園市')
-    # aircraft_location = [[x.longtitude, x.latitude] for x in aircraft]
-    # taoyuan_shelter = [[x.longtitude, x.latitude] for x in taoyuan_shelter]
-    # feature_group = folium.FeatureGroup(name = '桃園市', show = False)
-    
-    # # taoyuan_shelter.add_to(feature_group)
-    
-    # for i in range(len(taoyuan_shelter)):
-    #     folium.Marker(location=taoyuan_shelter[i]).add_to(feature_group)
-    #     # folium.Marker(location=aircraft_location[i]).add_to(m)
-    # feature_group.add_to(m)
-    # # folium.LayerControl().add_to(m)
-    
-    # water = ShelterDisaster.objects.all().filter(disaster='海嘯').select_related('shelter')
-    # # print(shelters)
-    # feature_group = folium.FeatureGroup(name='海嘯避難所', show = False)
-    # for shelter in water:
-    #     folium.Marker(location=[shelter.shelter.longtitude, shelter.shelter.latitude]).add_to(feature_group)
-    #     # print(shelter, shelter.shelter_id, shelter.shelter.longtitude)
-    # feature_group.add_to(m)
-    # folium.LayerControl().add_to(m)
-    # m = m._repr_html_()
-    # context = {
-    #     'map': m,
-    #     'aircraft': aircraft
-    # }
-    # return render(request, 'map.html', context)
     return render(request, 'map2.html')
 
 def renderCctv(request):
@@ -242,59 +214,33 @@ def getLink(request, url, LinkID):
         insert.save()
     elif LinkID not in already_insert:
         TrafficLinkBroken.objects.create(linkid=LinkID)
-    # city_list = ['Taipei', 'NewTaipei', 'Keelung', 'Taoyuan', 'YilanCounty', 'Taichung', 'Tainan']
-    # city_list = ['Taipei']
-    # linkid_list = []
-    # # for city in city_list:
-    # url_liveVD = f'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/{city}'
-    # data_liveVD = json.loads(getApiResponse(request, url_liveVD).content.decode("utf-8"))
-    # for i in data_liveVD['VDLives']:
-    #     for j in i['LinkFlows']:
-    #         linkid_list.append(j['LinkID'])
-    # print(len(linkid_list))
-    # linkid_list = list(dict.fromkeys(linkid_list))
-    # print(len(linkid_list))
-    # insert_list = []
-    # linkid = []
-    # for LinkID in linkid_list:
-    #     url_link = f'https://tdx.transportdata.tw/api/basic/v2/Road/Link/LinkID/{LinkID}'
-    #     try:
-    #         data_link = json.loads(getApiResponse(request, url_link).content.decode("utf-8"))
-    #     except:
-    #         print('decode error')
-    #     try:
-    #         insert_list.append(TrafficLink(data_link[0]['UpdateDate'], LinkID, data_link[0]['RoadName'], data_link[0]['StartPoint'], data_link[0]['EndPoint'], data_link[0]['City']))
-    #         linkid.append(LinkID)
-    #     except:
-    #         print(data_link)
-    # print(insert_list, len(insert_list), insert_list[0])
-    # print(len(linkid))
-    # linkid = list(dict.fromkeys(linkid))
-    # print(len(linkid))
-    # TrafficLink.objects.bulk_create(insert_list)
     return getApiResponse(request, url_link)
 
 
 def getCCTV(request):
-    TrafficCctv.objects.all().delete()
-    city_list = ['Taipei', 'NewTaipei', 'Keelung', 'Taoyuan', 'YilanCounty', 'Taichung', 'Tainan', 'Kaohsiung', 'TaitungCounty']
-    for city in city_list:
-        url_CCTV = f'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/CCTV/City/{city}'
-        data_CCTV = json.loads(getApiResponse(request, url_CCTV).content.decode("utf-8"))
-        update_time = data_CCTV['UpdateTime']
-        bulk_list = []
-        print(city)
-        for dict_CCTV in data_CCTV['CCTVs']:
-            dict_CCTV['update_time'] = data_CCTV['UpdateTime']
-            dict_CCTV['city'] = city
-            dict_CCTV = {k.lower(): v for k, v in dict_CCTV.items()}
-            column_name = [x.name for x in TrafficCctv._meta.get_fields()]
-            dict_CCTV = {x: dict_CCTV[x] for x in dict_CCTV.keys() if x in column_name}
-            if len(dict_CCTV.keys()) == 13:
-                bulk_list.append(TrafficCctv(dict_CCTV['update_time'], dict_CCTV['city'], dict_CCTV['cctvid'], dict_CCTV['linkid'], dict_CCTV['videostreamurl'], dict_CCTV['locationtype'], dict_CCTV['positionlon'], dict_CCTV['positionlat'], dict_CCTV['surveillancetype'], dict_CCTV['roadid'], dict_CCTV['roadname'], dict_CCTV['roadclass'], dict_CCTV['roaddirection']))
-            else:
-                TrafficCctv.objects.create(**dict_CCTV)
-        TrafficCctv.objects.bulk_create(bulk_list)
+    url_CCTV = 'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/CCTV/City/Taipei'
+    data_CCTV = json.loads(getApiResponse(request, url_CCTV).content.decode("utf-8"))
+    cctvid = TrafficCctv.objects.values_list('cctvid', flat = True)
+    update_time = data_CCTV['UpdateTime']
+    bulk_create = []
+    bulk_update = []
+    trafficcctv = TrafficCctv.objects.all()
+    for dict_CCTV in data_CCTV['CCTVs']:
+        dict_CCTV['update_time'] = data_CCTV['UpdateTime']
+        if dict_CCTV['CCTVID'] not in cctvid:
+            bulk_create.append(TrafficCctv(update_time, dict_CCTV['CCTVID'], dict_CCTV['VideoStreamURL'], dict_CCTV['PositionLon'], dict_CCTV['PositionLat'], dict_CCTV['RoadName']))
+        else:
+            for tc in trafficcctv:
+                if tc.pk == dict_CCTV:
+                    tc.update_time = update_time
+                    tc.videostreamurl = dict_CCTV['VideoStreamURL']
+                    tc.positionlat = dict_CCTV['PositionLat']
+                    tc.positionlon = dict_CCTV['PositionLon']
+                    tc.roadname = dict_CCTV['RoadName']               
+                    bulk_update.append(tc)
+
+    TrafficCctv.objects.bulk_create(bulk_create)
+    TrafficCctv.objects.bulk_update(bulk_update, ['update_time', 'videostreamurl', 'positionlat', 'positionlon', 'roadname'])  
     return getApiResponse(request, url_CCTV)
 
 def getSection(request):
