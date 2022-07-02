@@ -7,11 +7,13 @@ from django.core.files.storage import default_storage
 import io, folium
 from sympy import content
 from rest_framework.response import Response
-from .models import Aircraft, Shelter, ShelterDisaster, RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot
+from .models import Aircraft, Shelter, ShelterDisaster, RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot, Construction, ConstructionCoor, TrafficLinkBroken
 from datetime import datetime
 import boto3
 import xml.etree.ElementTree as ET
 import pandas as pd
+from django.db import transaction
+from pymongo import MongoClient
 
 def map(request):
     
@@ -77,49 +79,43 @@ def renderAlert(request):
     print(df_alert)
     return HttpResponse(df_alert)
 
+def getConstruction(request):
+    ConstructionCoor.objects.all().delete()
+    Construction.objects.all().delete()
+    url = "https://tpnco.blob.core.windows.net/blobfs/Todaywork.json"
+    response = requests.get(url)
+    data = json.loads(response.content.decode('utf-8-sig'), strict=False)['features']
+    construction = []
+    constructioncoor = []
+    aclist = []
+    coorlist = []
+    for d in data:
+        if d['properties']['Ac_no'] not in aclist:
+            aclist.append(d['properties']['Ac_no'])
+            construction.append(Construction(d['properties']['Ac_no'], d['properties']['AppTime'], d['properties']['App_Name'], d['properties']['C_Name'], d['properties']['Addr'], d['properties']['Cb_Da'], d['properties']['Ce_Da'], d['properties']['Co_Ti']))
+        for i in range(len(d['properties']['Positions'])):
+            if isinstance(d['properties']['Positions'][i]['coordinates'][0], list):
+                for coor in d['properties']['Positions'][i]['coordinates']:
+                    coor_append = [d['properties']['Ac_no'], i, twd97_to_lonlat(coor[0], coor[1])[0], twd97_to_lonlat(coor[0], coor[1])[1]]
+                    if coor_append not in coorlist:
+                        coorlist.append(coor_append)
+                        constructioncoor.append(ConstructionCoor(d['properties']['Ac_no'], i, twd97_to_lonlat(coor[0], coor[1])[0], twd97_to_lonlat(coor[0], coor[1])[1]))
+            else:
+                constructioncoor.append(ConstructionCoor(d['properties']['Ac_no'], i, twd97_to_lonlat(d['properties']['Positions'][i]['coordinates'][0], d['properties']['Positions'][i]['coordinates'][1])[0], twd97_to_lonlat(d['properties']['Positions'][i]['coordinates'][0], d['properties']['Positions'][i]['coordinates'][1])[1]))
+    Construction.objects.bulk_create(construction)
+    ConstructionCoor.objects.bulk_create(constructioncoor)
+    return HttpResponse(response)
+
 def getTraffic(request):
-    url = "https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/VD/City/Taipei"
-    # data = getApiResponse(request, url)
-    # data = json.loads(data.content.decode("utf-8"))
+    url = "https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/Taipei"
+    url = "https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/Taipei"
+    url = 'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/CCTV/City/Taipei'
+    data = getApiResponse(request, url)
+    data = json.loads(data.content.decode("utf-8"))
+    # for i in data['VDLives']:
+        # print(i.keys())
     
     return getApiResponse(request, url)
-
-def twd97_to_lonlat(x, y):
-    a = 6378137
-    b = 6356752.314245
-    long_0 = 121 * math.pi / 180.0
-    k0 = 0.9999
-    dx = 250000
-    dy = 0
-    e = math.pow((1-math.pow(b, 2)/math.pow(a,2)), 0.5)
-    x -= dx
-    y -= dy
-    M = y / k0
-    mu = M / ( a*(1-math.pow(e, 2)/4 - 3*math.pow(e,4)/64 - 5 * math.pow(e, 6)/256))
-    e1 = (1.0 - pow((1   - pow(e, 2)), 0.5)) / (1.0 +math.pow((1.0 -math.pow(e,2)), 0.5))
-    j1 = 3*e1/2-27*math.pow(e1,3)/32
-    j2 = 21 * math.pow(e1,2)/16 - 55 * math.pow(e1, 4)/32
-    j3 = 151 * math.pow(e1, 3)/96
-    j4 = 1097 * math.pow(e1, 4)/512
-    fp = mu + j1 * math.sin(2*mu) + j2 * math.sin(4* mu) + j3 * math.sin(6*mu) + j4 * math.sin(8* mu)
-    e2 = math.pow((e*a/b),2)
-    c1 = math.pow(e2*math.cos(fp),2)
-    t1 = math.pow(math.tan(fp),2)
-    r1 = a * (1-math.pow(e,2)) / math.pow( (1-math.pow(e,2)* math.pow(math.sin(fp),2)), (3/2))
-    n1 = a / math.pow((1-math.pow(e,2)*math.pow(math.sin(fp),2)),0.5)
-    d = x / (n1*k0)
-    q1 = n1* math.tan(fp) / r1
-    q2 = math.pow(d,2)/2
-    q3 = ( 5 + 3 * t1 + 10 * c1 - 4 * math.pow(c1,2) - 9 * e2 ) * math.pow(d,4)/24
-    q4 = (61 + 90 * t1 + 298 * c1 + 45 * math.pow(t1,2) - 3 * math.pow(c1,2) - 252 * e2) * math.pow(d,6)/720
-    lat = fp - q1 * (q2 - q3 + q4)
-    q5 = d
-    q6 = (1+2*t1+c1) * math.pow(d,3) / 6
-    q7 = (5 - 2 * c1 + 28 * t1 - 3 * math.pow(c1,2) + 8 * e2 + 24 * math.pow(t1,2)) * math.pow(d,5) / 120
-    lon = long_0 + (q5 - q6 + q7) / math.cos(fp)
-    lat = (lat*180) / math.pi
-    lon = (lon*180) / math.pi
-    return [lat, lon]
 
 def getParking(request):
     Parkinglot.objects.all().delete()
@@ -161,79 +157,121 @@ def renderParking(request):
     parking = df_parking.values.tolist()
     return HttpResponse(parking)
 
-def getLive(request):
-    TrafficLivecity.objects.all().delete()
-    TrafficLivevd.objects.all().delete()
-    city_list = ['Taipei', 'NewTaipei', 'Keelung', 'Taoyuan', 'YilanCounty', 'Taichung', 'Tainan']
-    # df_liveVD = pd.DataFrame(columns = ['update_time', 'city', 'VDID', 'linkid', 'laneid', 'lanetype', 'speed', 'occupancy'])
-    # df_livecity = pd.DataFrame(columns = ['update_time', 'city', 'sectionid_id', 'traveltime', 'travelspeed', 'congestionlevelid', 'congestionlevel'])
-    list_liveVD = []
-    list_livecity = []
-    linkid_list = TrafficLink.objects.values_list('linkid', flat=True)
+def get_db_handle(db_name, host, port, username, password):
+    client = MongoClient(host = host, port = int(port), username = username, password = password)
+    db = client[db_name]
+    return db, client
 
-    for city in city_list:
-        url_liveVD = f'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/{city}'
-        data_liveVD = json.loads(getApiResponse(request, url_liveVD).content.decode("utf-8"))
-        update_time = data_liveVD['UpdateTime']
-        print(city)
-        for i in range(len(data_liveVD['VDLives'])):
-            if city == 'YilanCounty':
-                data_liveVD['VDLives'][i]['VDID'] = data_liveVD['VDLives'][i]['VDID'].split(':')[2]
-            for j in range(len(data_liveVD['VDLives'][i]['LinkFlows'])):       
-                for k in data_liveVD['VDLives'][i]['LinkFlows'][j]['Lanes']:
-                    if data_liveVD['VDLives'][i]['LinkFlows'][j]['LinkID'] in linkid_list:
-                        list_liveVD.append(TrafficLivevd(update_time, city, data_liveVD['VDLives'][i]['VDID'], data_liveVD['VDLives'][i]['LinkFlows'][j]['LinkID'], k['LaneID'], k['LaneType'], k['Speed'], k['Occupancy']))
-        url_livecity = f'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/City/{city}'
-        data_livecity = json.loads(getApiResponse(request, url_livecity).content.decode("utf-8"))
-        update_time = data_livecity['UpdateTime']
-        sectionidlist = []
-        for i in range(len(data_livecity['LiveTraffics'])):
-            try:
-                if city != 'YilanCounty':
-                    list_livecity.append(TrafficLivecity(update_time, city, data_livecity['LiveTraffics'][i]['SectionID'], data_livecity['LiveTraffics'][i]['TravelTime'], data_livecity['LiveTraffics'][0]['TravelSpeed'], data_livecity['LiveTraffics'][0]['CongestionLevelID'], data_livecity['LiveTraffics'][0]['CongestionLevel']))
-                else:
-                    if data_livecity['LiveTraffics'][i]['SectionID'] in sectionidlist:
-                        continue
-                    else:
-                        sectionidlist.append(data_livecity['LiveTraffics'][i]['SectionID'])
-                        list_livecity.append(TrafficLivecity(update_time, city, data_livecity['LiveTraffics'][i]['SectionID'], data_livecity['LiveTraffics'][i]['TravelTime'], data_livecity['LiveTraffics'][0]['TravelSpeed'], data_livecity['LiveTraffics'][0]['CongestionLevelID'], data_livecity['LiveTraffics'][0]['CongestionLevel']))
-            except:
-                pass
-    TrafficLivecity.objects.bulk_create(list_livecity)
-    TrafficLivevd.objects.bulk_create(list_liveVD)
-    return getApiResponse(request, url_livecity)
+def getLiveVD(request):
+    db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
+    collection = db['vd_history']
+    # information to be store or update
+    bulk_update = []
+    bulk_create = []
 
-def getLink(request):
-    TrafficLink.objects.all().delete()
-    city_list = ['Taipei', 'NewTaipei', 'Keelung', 'Taoyuan', 'YilanCounty', 'Taichung', 'Tainan']
-    linkid_list = []
-    for city in city_list:
-        url_liveVD = f'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/{city}'
-        data_liveVD = json.loads(getApiResponse(request, url_liveVD).content.decode("utf-8"))
-        for i in data_liveVD['VDLives']:
-            for j in i['LinkFlows']:
-                linkid_list.append(j['LinkID'])
-    print(len(linkid_list))
-    linkid_list = list(dict.fromkeys(linkid_list))
-    print(len(linkid_list))
+    # broken linkid
+    broken_link = TrafficLinkBroken.objects.values_list('linkid', flat = True)
+    # stoarable linkid
+    storable_link = TrafficLink.objects.values_list('linkid', flat = True)
+    # linkid already in live vd table
+    existing_link = TrafficLivevd.objects.values_list('linkid', flat = True)
+    
+    url_liveVD = 'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/Taipei'
+    data_liveVD = json.loads(getApiResponse(request, url_liveVD).content.decode("utf-8"))
+    update_time = data_liveVD['UpdateTime']
+    for vdlive in data_liveVD['VDLives']:
+        for linkflow in vdlive['LinkFlows']:
+            for lane in linkflow['Lanes']:
+                # 0. 擋下壞掉的 linkid
+                if linkflow['LinkID'] in broken_link:
+                    continue
+                # 1. 正確性：-99 代表壞掉，對應的 linkid 不用存進表格，讓 link id table 蒐集對應資訊
+                elif lane['Speed'] == -99.0:
+                    continue
+                # 2. 可行性：link id 不在現有 link id 中，要另外爬
+                elif linkflow['LinkID'] not in storable_link:
+                    url_link = f'https://tdx.transportdata.tw/api/basic/v2/Road/Link/LinkID/{linkflow["LinkID"]}'
+                    getLink(request, url_link, linkflow['LinkID'])
+                # 3. update or create
+                elif linkflow['LinkID'] not in existing_link:
+                    bulk_create.append([update_time, vdlive['VDID'], linkflow['LinkID'], lane['Speed']])
+                elif linkflow['LinkID'] in existing_link:
+                    bulk_update.append([update_time, vdlive['VDID'], linkflow['LinkID'], lane['Speed']])
+    df_bulk_create = pd.DataFrame(bulk_create, columns = ['update_time', 'VDID', 'LinkID', 'Speed'])
+    df_bulk_update = pd.DataFrame(bulk_update, columns = ['update_time', 'VDID', 'LinkID', 'Speed'])
+    df_bulk_create = df_bulk_create[df_bulk_create['Speed']!=0]
+    df_bulk_update = df_bulk_update[df_bulk_update['Speed']!=0]
+    df_bulk_create = df_bulk_create.groupby(['LinkID']).agg({'update_time':'first', 'Speed':'mean'}).reset_index()
+    df_bulk_update = df_bulk_update.groupby(['LinkID']).agg({'update_time':'first', 'Speed':'mean'}).reset_index()
+    df_concat = pd.concat([df_bulk_update, df_bulk_create])
+    
+    # insert into mongo
+    documents = df_concat.T.to_dict().values()
+    collection.insert_many(documents)
+    
+    # bulk create
+    df_bulk_create = [TrafficLivevd(x['update_time'], x['LinkID'], x['Speed']) for index, x in df_bulk_create.iterrows()]
+    TrafficLivevd.objects.bulk_create(df_bulk_create)
+    
+    # bulk update
+    bulk_update_list = []
+    all_trafficlivd = TrafficLivevd.objects.all()
+    for at in all_trafficlivd:
+        for index, x in df_bulk_update.iterrows():
+            if at.pk == x['LinkID']:
+                at.update_time = x['update_time']
+                at.speed = x['Speed']
+                bulk_update_list.append(at)
+    TrafficLivevd.objects.bulk_update(bulk_update_list, ['update_time', 'speed'])    
+    return getApiResponse(request, url_liveVD)
+
+def getLink(request, url, LinkID):
+    print('Enter get link', LinkID)
+    already_insert = TrafficLinkBroken.objects.values_list('linkid', flat = True)
+    url_link = url
     insert_list = []
     linkid = []
-    for LinkID in linkid_list:
-        url_link = f'https://tdx.transportdata.tw/api/basic/v2/Road/Link/LinkID/{LinkID}'
-        try:
-            data_link = json.loads(getApiResponse(request, url_link).content.decode("utf-8"))
-        except:
-            print('decode error')
-        try:
-            insert_list.append(TrafficLink(data_link[0]['UpdateDate'], LinkID, data_link[0]['RoadName'], data_link[0]['StartPoint'], data_link[0]['EndPoint'], data_link[0]['City']))
-            linkid.append(LinkID)
-        except:
-            print(data_link)
-    print(insert_list, len(insert_list), insert_list[0])
-    print(len(linkid))
-    linkid = list(dict.fromkeys(linkid))
-    print(len(linkid))
-    TrafficLink.objects.bulk_create(insert_list)
+    try:
+        data_link = json.loads(getApiResponse(request, url_link).content.decode("utf-8"))
+        print(data_link)
+    except:
+        data_link = []
+        
+    if data_link:
+        insert = TrafficLink(data_link[0]['UpdateDate'], LinkID, data_link[0]['RoadName'], data_link[0]['StartPoint'], data_link[0]['MidPoint'], data_link[0]['EndPoint'])
+        insert.save()
+    elif LinkID not in already_insert:
+        TrafficLinkBroken.objects.create(linkid=LinkID)
+    # city_list = ['Taipei', 'NewTaipei', 'Keelung', 'Taoyuan', 'YilanCounty', 'Taichung', 'Tainan']
+    # city_list = ['Taipei']
+    # linkid_list = []
+    # # for city in city_list:
+    # url_liveVD = f'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/{city}'
+    # data_liveVD = json.loads(getApiResponse(request, url_liveVD).content.decode("utf-8"))
+    # for i in data_liveVD['VDLives']:
+    #     for j in i['LinkFlows']:
+    #         linkid_list.append(j['LinkID'])
+    # print(len(linkid_list))
+    # linkid_list = list(dict.fromkeys(linkid_list))
+    # print(len(linkid_list))
+    # insert_list = []
+    # linkid = []
+    # for LinkID in linkid_list:
+    #     url_link = f'https://tdx.transportdata.tw/api/basic/v2/Road/Link/LinkID/{LinkID}'
+    #     try:
+    #         data_link = json.loads(getApiResponse(request, url_link).content.decode("utf-8"))
+    #     except:
+    #         print('decode error')
+    #     try:
+    #         insert_list.append(TrafficLink(data_link[0]['UpdateDate'], LinkID, data_link[0]['RoadName'], data_link[0]['StartPoint'], data_link[0]['EndPoint'], data_link[0]['City']))
+    #         linkid.append(LinkID)
+    #     except:
+    #         print(data_link)
+    # print(insert_list, len(insert_list), insert_list[0])
+    # print(len(linkid))
+    # linkid = list(dict.fromkeys(linkid))
+    # print(len(linkid))
+    # TrafficLink.objects.bulk_create(insert_list)
     return getApiResponse(request, url_link)
 
 
@@ -385,3 +423,40 @@ def getApiResponse(request, url):
     headers = {'authorization': f'Bearer {token}'}
     response = requests.get(url, headers = headers)
     return HttpResponse(response)
+
+def twd97_to_lonlat(x, y):
+    a = 6378137
+    b = 6356752.314245
+    long_0 = 121 * math.pi / 180.0
+    k0 = 0.9999
+    dx = 250000
+    dy = 0
+    e = math.pow((1-math.pow(b, 2)/math.pow(a,2)), 0.5)
+    x -= dx
+    y -= dy
+    M = y / k0
+    mu = M / ( a*(1-math.pow(e, 2)/4 - 3*math.pow(e,4)/64 - 5 * math.pow(e, 6)/256))
+    e1 = (1.0 - pow((1   - pow(e, 2)), 0.5)) / (1.0 +math.pow((1.0 -math.pow(e,2)), 0.5))
+    j1 = 3*e1/2-27*math.pow(e1,3)/32
+    j2 = 21 * math.pow(e1,2)/16 - 55 * math.pow(e1, 4)/32
+    j3 = 151 * math.pow(e1, 3)/96
+    j4 = 1097 * math.pow(e1, 4)/512
+    fp = mu + j1 * math.sin(2*mu) + j2 * math.sin(4* mu) + j3 * math.sin(6*mu) + j4 * math.sin(8* mu)
+    e2 = math.pow((e*a/b),2)
+    c1 = math.pow(e2*math.cos(fp),2)
+    t1 = math.pow(math.tan(fp),2)
+    r1 = a * (1-math.pow(e,2)) / math.pow( (1-math.pow(e,2)* math.pow(math.sin(fp),2)), (3/2))
+    n1 = a / math.pow((1-math.pow(e,2)*math.pow(math.sin(fp),2)),0.5)
+    d = x / (n1*k0)
+    q1 = n1* math.tan(fp) / r1
+    q2 = math.pow(d,2)/2
+    q3 = ( 5 + 3 * t1 + 10 * c1 - 4 * math.pow(c1,2) - 9 * e2 ) * math.pow(d,4)/24
+    q4 = (61 + 90 * t1 + 298 * c1 + 45 * math.pow(t1,2) - 3 * math.pow(c1,2) - 252 * e2) * math.pow(d,6)/720
+    lat = fp - q1 * (q2 - q3 + q4)
+    q5 = d
+    q6 = (1+2*t1+c1) * math.pow(d,3) / 6
+    q7 = (5 - 2 * c1 + 28 * t1 - 3 * math.pow(c1,2) + 8 * e2 + 24 * math.pow(t1,2)) * math.pow(d,5) / 120
+    lon = long_0 + (q5 - q6 + q7) / math.cos(fp)
+    lat = (lat*180) / math.pi
+    lon = (lon*180) / math.pi
+    return [lat, lon]

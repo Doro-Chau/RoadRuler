@@ -9,11 +9,12 @@ urlpatterns = [
     path('getCCTV', views.getCCTV),
     path('getSection', views.getSection),
     path('getLink', views.getLink),
-    path('getLive', views.getLive),
+    path('getLiveVD', views.getLiveVD),
     path('renderCctv', views.renderCctv),
     path('renderLivevd', views.renderLivevd),
     path('renderLivecity', views.renderLivecity),
     path('renderAlert', views.renderAlert),
     path('getParking', views.getParking),
-    path('renderParking', views.renderParking)
+    path('renderParking', views.renderParking),
+    path('getConstruction', views.getConstruction)
 ]

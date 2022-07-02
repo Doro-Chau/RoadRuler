@@ -113,6 +113,33 @@ class AuthUserUserPermissions(models.Model):
         unique_together = (('user', 'permission'),)
 
 
+class Construction(models.Model):
+    ac_no = models.CharField(db_column='Ac_no', primary_key=True, max_length=45)  # Field name made lowercase.
+    apptime = models.CharField(db_column='AppTime', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    app_name = models.CharField(db_column='App_Name', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    c_name = models.CharField(db_column='C_Name', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    addr = models.CharField(db_column='Addr', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    cb_da = models.CharField(db_column='Cb_Da', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    ce_da = models.CharField(db_column='Ce_Da', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    co_ti = models.CharField(db_column='Co_Ti', max_length=45, blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'construction'
+
+
+class ConstructionCoor(models.Model):
+    ac_no = models.OneToOneField(Construction, models.DO_NOTHING, db_column='Ac_no', primary_key=True)  # Field name made lowercase.
+    road = models.IntegerField()
+    lat = models.CharField(max_length=45)
+    lon = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False
+        db_table = 'construction_coor'
+        unique_together = (('ac_no', 'road', 'lat', 'lon'),)
+
+
 class DjangoAdminLog(models.Model):
     action_time = models.DateTimeField()
     object_id = models.TextField(blank=True, null=True)
@@ -259,28 +286,30 @@ class TrafficLink(models.Model):
     linkid = models.CharField(db_column='LinkID', primary_key=True, max_length=45)  # Field name made lowercase.
     roadname = models.CharField(db_column='RoadName', max_length=45, blank=True, null=True)  # Field name made lowercase.
     startpoint = models.CharField(db_column='StartPoint', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    midpoint = models.CharField(db_column='MidPoint', max_length=100, blank=True, null=True)  # Field name made lowercase.
     endpoint = models.CharField(db_column='EndPoint', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    city = models.CharField(max_length=45, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'traffic_link'
 
 
+class TrafficLinkBroken(models.Model):
+    linkid = models.CharField(db_column='LinkID', primary_key=True, max_length=45)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'traffic_link_broken'
+
+
 class TrafficLivevd(models.Model):
     update_time = models.CharField(max_length=80, blank=True, null=True)
-    city = models.CharField(max_length=45, blank=True, null=True)
-    vdid = models.CharField(db_column='VDID', primary_key=True, max_length=45)  # Field name made lowercase.
-    linkid = models.ForeignKey(TrafficLink, models.DO_NOTHING, db_column='LinkID')  # Field name made lowercase.
-    laneid = models.IntegerField(db_column='LaneID')  # Field name made lowercase.
-    lanetype = models.IntegerField(db_column='LaneType', blank=True, null=True)  # Field name made lowercase.
+    linkid = models.OneToOneField(TrafficLink, models.DO_NOTHING, db_column='LinkID', primary_key=True)  # Field name made lowercase.
     speed = models.DecimalField(db_column='Speed', max_digits=10, decimal_places=0, blank=True, null=True)  # Field name made lowercase.
-    occupancy = models.CharField(db_column='Occupancy', max_length=45, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'traffic_liveVD'
-        unique_together = (('vdid', 'laneid', 'linkid'),)
 
 
 class TrafficLivecity(models.Model):
