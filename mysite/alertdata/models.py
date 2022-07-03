@@ -114,14 +114,14 @@ class AuthUserUserPermissions(models.Model):
 
 
 class Construction(models.Model):
-    ac_no = models.CharField(db_column='Ac_no', primary_key=True, max_length=45)  # Field name made lowercase.
-    apptime = models.CharField(db_column='AppTime', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    app_name = models.CharField(db_column='App_Name', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    c_name = models.CharField(db_column='C_Name', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    addr = models.CharField(db_column='Addr', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    cb_da = models.CharField(db_column='Cb_Da', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    ce_da = models.CharField(db_column='Ce_Da', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    co_ti = models.CharField(db_column='Co_Ti', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    facility_no = models.CharField(primary_key=True, max_length=45)
+    reporttime = models.CharField(db_column='reportTime', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    contractor = models.CharField(max_length=45, blank=True, null=True)
+    distinct = models.CharField(max_length=45, blank=True, null=True)
+    address = models.CharField(db_column='Address', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    construction_begin = models.CharField(max_length=45, blank=True, null=True)
+    construction_end = models.CharField(max_length=45, blank=True, null=True)
+    construction_timezone = models.CharField(max_length=45, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -129,7 +129,7 @@ class Construction(models.Model):
 
 
 class ConstructionCoor(models.Model):
-    ac_no = models.OneToOneField(Construction, models.DO_NOTHING, db_column='Ac_no', primary_key=True)  # Field name made lowercase.
+    facility_no = models.OneToOneField(Construction, models.DO_NOTHING, db_column='facility_no', primary_key=True)  # Field name made lowercase.
     road = models.IntegerField()
     lat = models.CharField(max_length=45)
     lon = models.CharField(max_length=45)
@@ -137,7 +137,7 @@ class ConstructionCoor(models.Model):
     class Meta:
         managed = False
         db_table = 'construction_coor'
-        unique_together = (('ac_no', 'road', 'lat', 'lon'),)
+        unique_together = (('facility_no', 'road', 'lat', 'lon'),)
 
 
 class DjangoAdminLog(models.Model):
@@ -192,12 +192,10 @@ class Parkinglot(models.Model):
     name = models.CharField(max_length=45, blank=True, null=True)
     summary = models.CharField(max_length=255, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
-    tel = models.CharField(max_length=45, blank=True, null=True)
     payex = models.CharField(max_length=255, blank=True, null=True)
     servicetime = models.CharField(db_column='serviceTime', max_length=255, blank=True, null=True)  # Field name made lowercase.
     totalcar = models.IntegerField(blank=True, null=True)
     availablecar = models.IntegerField(blank=True, null=True)
-    fareinfo = models.CharField(db_column='FareInfo', max_length=255, blank=True, null=True)  # Field name made lowercase.
     entrancelat = models.CharField(db_column='EntranceLat', max_length=45)  # Field name made lowercase.
     entrancelon = models.CharField(db_column='EntranceLon', max_length=45)  # Field name made lowercase.
 

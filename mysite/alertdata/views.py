@@ -19,19 +19,22 @@ def map(request):
     return render(request, 'map2.html')
 
 def renderCctv(request):
-    cctv = TrafficCctv.objects.filter(videostreamurl__isnull=False).filter(positionlat__isnull=False).filter(positionlon__isnull=False)
-    cctv = [[x.cctvid, x.city, x.videostreamurl, x.positionlat, x.positionlon] for x in cctv]
+    cctv = pd.DataFrame(list(TrafficCctv.objects.all().values()))
+    cctv = cctv.values.tolist()
+    # cctv = TrafficCctv.objects.filter(videostreamurl__isnull=False).filter(positionlat__isnull=False).filter(positionlon__isnull=False)
+    # cctv = [[x.cctvid, x.city, x.videostreamurl, x.positionlat, x.positionlon] for x in cctv]
     return HttpResponse(cctv)
 
 def renderLivevd(request):
     df_livevd = pd.DataFrame(list(TrafficLivevd.objects.all().values()))
     df_link = pd.DataFrame(list(TrafficLink.objects.all().values()))
     df_livevd.rename(columns={'linkid_id':'linkid'}, inplace=True)
-    df_livevd = df_livevd.groupby('linkid').agg({'city':'first', 'vdid': 'first', 'speed':'mean'}).reset_index()
-    df_merge = df_link.merge(df_livevd, how = 'inner', on=['linkid', 'city'])
+    df_merge = df_link.merge(df_livevd, how = 'inner', on='linkid')
     df_merge[['startlon', 'startlat']] = df_merge['startpoint'].str.split(',', expand=True)
+    df_merge[['midlon', 'midlat']] = df_merge['midpoint'].str.split(',', expand=True)
     df_merge[['endlon', 'endlat']] = df_merge['endpoint'].str.split(',', expand=True)
-    df_merge = df_merge.drop(columns=['update_time', 'startpoint', 'endpoint'])
+    df_merge = df_merge.drop(columns=['update_time_x', 'update_time_y', 'startpoint', 'midpoint', 'endpoint'])
+    df_merge['speed'] = df_merge['speed'].astype(str)
     merge = df_merge.values.tolist()
     return HttpResponse(merge)
 
@@ -50,6 +53,15 @@ def renderAlert(request):
     df_alert.to_csv('a.csv')
     print(df_alert)
     return HttpResponse(df_alert)
+
+def renderConstruction(reuest):
+    df_construction = pd.DataFrame(list(Construction.objects.all().values()))
+    df_construction_coor = pd.DataFrame(list(ConstructionCoor.objects.all().values()))
+    df_construction_coor.rename(columns={'facility_no_id':'facility_no'}, inplace=True)
+    df_merge = df_construction.merge(df_construction_coor, how='inner', on='facility_no')
+    df_merge = df_merge[['facility_no', 'contractor', 'road', 'lat', 'lon']]
+    merge = df_merge.values.tolist()
+    return HttpResponse(merge)
 
 def getConstruction(request):
     ConstructionCoor.objects.all().delete()
@@ -90,16 +102,18 @@ def getTraffic(request):
     return getApiResponse(request, url)
 
 def getParking(request):
-    Parkinglot.objects.all().delete()
+    bulk_create = []
+    bulk_update = []
+    exist_id = Parkinglot.objects.values_list('id', flat = True)
     # parking lot information
     parkingurl = "https://tcgbusfs.blob.core.windows.net/blobtcmsv/TCMSV_alldesc.json"
     response_park = requests.get(parkingurl)
     parkdata = response_park.json()['data']
-    update_time = parkdata['UPDATETIME']
+    # update_time = parkdata['UPDATETIME']
     df_park = pd.DataFrame(parkdata['park'])
     df_park["tw97x"] = pd.to_numeric(df_park["tw97x"])
     df_park["tw97y"] = pd.to_numeric(df_park["tw97y"])
-    df_park['update_time'] = update_time
+    # df_park['update_time'] = update_time
     df_park = df_park[df_park['tw97x']>100]
     df_park = df_park.reset_index(drop=True)
     df_park[['entrancelat', 'entrancelon']] = ''
@@ -112,15 +126,42 @@ def getParking(request):
     livedata = response.json()['data']
     update_time = livedata['UPDATETIME']
     df_live = pd.DataFrame(livedata['park'])
+    df_live['update_time'] = update_time
     
     df_merge = df_park.merge(df_live, how='left', on='id')
-    df_merge = df_merge[['update_time', 'id', 'area', 'name', 'summary', 'address', 'tel', 'payex', 'serviceTime', 'totalcar', 'availablecar', 'FareInfo', 'entrancelat', 'entrancelon']]
+    df_merge = df_merge[['update_time', 'id', 'area', 'name', 'summary', 'address', 'payex', 'serviceTime', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon']]
     df_merge = df_merge.where(pd.notnull(df_merge), 99999)
     df_merge = df_merge[df_merge['entrancelat'] > 20]
     df_merge['name'] = df_merge['name'].str.replace(' ', '')
-    bulk_list = [Parkinglot(x['update_time'], x['id'], x['area'], x['name'], x['summary'], x['address'], x['tel'], x['payex'], x['serviceTime'], x['totalcar'], x['availablecar'], x['FareInfo'], x['entrancelat'], x['entrancelon']) for index, x in df_merge.iterrows()]
-    Parkinglot.objects.bulk_create(bulk_list)
-    return HttpResponse(df_merge)
+    # insert into mongo
+    df_mongo = df_merge[['id', 'totalcar', 'availablecar']]
+    db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
+    collection = db['lot_history']
+    documents = df_mongo.T.to_dict().values()
+    collection.insert_many(documents)
+
+    parkinglot = Parkinglot.objects.all()
+    for index, x in df_merge.iterrows():
+        if x['id'] not in exist_id:
+            bulk_create.append(Parkinglot(x['update_time'], x['id'], x['area'], x['name'], x['summary'], x['address'], x['payex'], x['serviceTime'], x['totalcar'], x['availablecar'], x['entrancelat'], x['entrancelon']))
+            continue
+        for pkl in parkinglot:        
+            if pkl.pk == x['id']:
+                pkl.update_time = x['update_time']
+                pkl.area = x['area']
+                pkl.name = x['name']
+                pkl.summary = x['summary']
+                pkl.address = x['address']
+                pkl.payex = x['payex']
+                pkl.servicetime = x['serviceTime']
+                pkl.totalcar = x['totalcar']
+                pkl.availablecar = x['availablecar']
+                pkl.entrancelat = x['entrancelat']
+                pkl.entrancelon = x['entrancelon']
+                bulk_update.append(pkl)
+    Parkinglot.objects.bulk_create(bulk_create)
+    Parkinglot.objects.bulk_update(bulk_update, ['update_time', 'area', 'name', 'summary', 'address', 'payex', 'servicetime', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon'])
+    return HttpResponse(response)
 
 def renderParking(request):
     df_parking = pd.DataFrame(list(Parkinglot.objects.all().values()))

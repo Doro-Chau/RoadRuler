@@ -16,5 +16,6 @@ urlpatterns = [
     path('renderAlert', views.renderAlert),
     path('getParking', views.getParking),
     path('renderParking', views.renderParking),
-    path('getConstruction', views.getConstruction)
+    path('getConstruction', views.getConstruction),
+    path('renderConstruction', views.renderConstruction)
 ]
