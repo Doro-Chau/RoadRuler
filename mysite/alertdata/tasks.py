@@ -174,14 +174,14 @@ def getLiveVD():
     return getApiResponse(url_liveVD)
 
 def getLink(url, LinkID):
-    print('Enter get link', LinkID)
+    #print('Enter get link', LinkID)
     already_insert = models.TrafficLinkBroken.objects.values_list('linkid', flat = True)
     url_link = url
     insert_list = []
     linkid = []
     try:
         data_link = json.loads(getApiResponse(url_link).content.decode("utf-8"))
-        print(data_link)
+        #print(data_link)
     except:
         data_link = []
         
@@ -233,7 +233,8 @@ def getAuthorizationHeader():
 
 def getApiResponse(url):
     token = getAuthorizationHeader()
-    token = token.content.decode("utf-8")
+    #print(token)
+    #token = token.content.decode("utf-8")
     headers = {'authorization': f'Bearer {token}'}
     response = requests.get(url, headers = headers)
     return HttpResponse(response)
