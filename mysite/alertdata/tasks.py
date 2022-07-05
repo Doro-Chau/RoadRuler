@@ -1,11 +1,19 @@
-from .models import Construction, ConstructionCoor, Parkinglot, TrafficLink, TrafficLinkBroken, TrafficLivevd, TrafficCctv
-import requests, json, math, os
+import requests, json, math, os, sys, django
+sys.path.append('/home/ec2-user/Project_disaster_map/mysite/')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
+#if __name__ == '__main__':
+ #   import django
+  #  django.setup()
+django.setup()
+sys.path.append('/home/ec2-user/Project_disaster_map/mysite/alertdata/')
+from alertdata import models
+#from models import Construction, ConstructionCoor, Parkinglot, TrafficLink, TrafficLinkBroken, TrafficLivevd, TrafficCctv
 from django.http import HttpResponse
 import pandas as pd
 from pymongo import MongoClient
 
-def getConstruction(request):
-    ConstructionCoor.objects.all().delete()
+def getConstruction():
+    models.ConstructionCoor.objects.all().delete()
     Construction.objects.all().delete()
     url = "https://tpnco.blob.core.windows.net/blobfs/Todaywork.json"
     response = requests.get(url)
