@@ -17,7 +17,10 @@ def getConstruction():
     models.Construction.objects.all().delete()
     url = "https://tpnco.blob.core.windows.net/blobfs/Todaywork.json"
     response = requests.get(url)
-    data = json.loads(response.content.decode('utf-8-sig'), strict=False)['features']
+    
+    data = json.loads(response.content.decode('utf-8-sig'))['features']
+    #print(data)
+    #data = json.loads(response.content.decode('utf-8-sig'), strict=False)['features']
     construction = []
     constructioncoor = []
     aclist = []
