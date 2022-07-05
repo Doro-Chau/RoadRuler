@@ -19,8 +19,6 @@ def getConstruction():
     response = requests.get(url)
     
     data = json.loads(response.content.decode('utf-8-sig'))['features']
-    #print(data)
-    #data = json.loads(response.content.decode('utf-8-sig'), strict=False)['features']
     construction = []
     constructioncoor = []
     aclist = []
@@ -51,11 +49,9 @@ def getParking():
     parkingurl = "https://tcgbusfs.blob.core.windows.net/blobtcmsv/TCMSV_alldesc.json"
     response_park = requests.get(parkingurl)
     parkdata = response_park.json()['data']
-    # update_time = parkdata['UPDATETIME']
     df_park = pd.DataFrame(parkdata['park'])
     df_park["tw97x"] = pd.to_numeric(df_park["tw97x"])
     df_park["tw97y"] = pd.to_numeric(df_park["tw97y"])
-    # df_park['update_time'] = update_time
     df_park = df_park[df_park['tw97x']>100]
     df_park = df_park.reset_index(drop=True)
     df_park[['entrancelat', 'entrancelon']] = ''
@@ -109,6 +105,7 @@ def get_db_handle(db_name, host, port, username, password):
     client = MongoClient(host = host, port = int(port), username = username, password = password)
     db = client[db_name]
     return db, client
+
 
 def getLiveVD():
     db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
@@ -174,14 +171,12 @@ def getLiveVD():
     return getApiResponse(url_liveVD)
 
 def getLink(url, LinkID):
-    #print('Enter get link', LinkID)
     already_insert = models.TrafficLinkBroken.objects.values_list('linkid', flat = True)
     url_link = url
     insert_list = []
     linkid = []
     try:
         data_link = json.loads(getApiResponse(url_link).content.decode("utf-8"))
-        #print(data_link)
     except:
         data_link = []
         
@@ -193,9 +188,9 @@ def getLink(url, LinkID):
     return getApiResponse(url_link)
 
 
-def getCCTV(request):
+def getCCTV():
     url_CCTV = 'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/CCTV/City/Taipei'
-    data_CCTV = json.loads(getApiResponse(request, url_CCTV).content.decode("utf-8"))
+    data_CCTV = json.loads(getApiResponse(url_CCTV).content.decode("utf-8"))
     cctvid = models.TrafficCctv.objects.values_list('cctvid', flat = True)
     update_time = data_CCTV['UpdateTime']
     bulk_create = []
@@ -217,7 +212,7 @@ def getCCTV(request):
 
     models.TrafficCctv.objects.bulk_create(bulk_create)
     models.TrafficCctv.objects.bulk_update(bulk_update, ['update_time', 'videostreamurl', 'positionlat', 'positionlon', 'roadname'])  
-    return getApiResponse(request, url_CCTV)
+    return getApiResponse(url_CCTV)
 
 def getAuthorizationHeader():
     url = 'https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token'
@@ -233,8 +228,6 @@ def getAuthorizationHeader():
 
 def getApiResponse(url):
     token = getAuthorizationHeader()
-    #print(token)
-    #token = token.content.decode("utf-8")
     headers = {'authorization': f'Bearer {token}'}
     response = requests.get(url, headers = headers)
     return HttpResponse(response)
