@@ -7,14 +7,14 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
 django.setup()
 sys.path.append('/home/ec2-user/Project_disaster_map/mysite/alertdata/')
 from alertdata import models
-#from models import Construction, ConstructionCoor, Parkinglot, TrafficLink, TrafficLinkBroken, TrafficLivevd, TrafficCctv
 from django.http import HttpResponse
+#from models import Construction, ConstructionCoor, Parkinglot, TrafficLink, TrafficLinkBroken, TrafficLivevd, TrafficCctv
 import pandas as pd
 from pymongo import MongoClient
 
 def getConstruction():
     models.ConstructionCoor.objects.all().delete()
-    Construction.objects.all().delete()
+    models.Construction.objects.all().delete()
     url = "https://tpnco.blob.core.windows.net/blobfs/Todaywork.json"
     response = requests.get(url)
     data = json.loads(response.content.decode('utf-8-sig'), strict=False)['features']
@@ -25,35 +25,25 @@ def getConstruction():
     for d in data:
         if d['properties']['Ac_no'] not in aclist:
             aclist.append(d['properties']['Ac_no'])
-            construction.append(Construction(d['properties']['Ac_no'], d['properties']['AppTime'], d['properties']['App_Name'], d['properties']['C_Name'], d['properties']['Addr'], d['properties']['Cb_Da'], d['properties']['Ce_Da'], d['properties']['Co_Ti']))
+            construction.append(models.Construction(d['properties']['Ac_no'], d['properties']['AppTime'], d['properties']['App_Name'], d['properties']['C_Name'], d['properties']['Addr'], d['properties']['Cb_Da'], d['properties']['Ce_Da'], d['properties']['Co_Ti']))
         for i in range(len(d['properties']['Positions'])):
             if isinstance(d['properties']['Positions'][i]['coordinates'][0], list):
                 for coor in d['properties']['Positions'][i]['coordinates']:
                     coor_append = [d['properties']['Ac_no'], i, twd97_to_lonlat(coor[0], coor[1])[0], twd97_to_lonlat(coor[0], coor[1])[1]]
                     if coor_append not in coorlist:
                         coorlist.append(coor_append)
-                        constructioncoor.append(ConstructionCoor(d['properties']['Ac_no'], i, twd97_to_lonlat(coor[0], coor[1])[0], twd97_to_lonlat(coor[0], coor[1])[1]))
+                        constructioncoor.append(models.ConstructionCoor(d['properties']['Ac_no'], i, twd97_to_lonlat(coor[0], coor[1])[0], twd97_to_lonlat(coor[0], coor[1])[1]))
             else:
-                constructioncoor.append(ConstructionCoor(d['properties']['Ac_no'], i, twd97_to_lonlat(d['properties']['Positions'][i]['coordinates'][0], d['properties']['Positions'][i]['coordinates'][1])[0], twd97_to_lonlat(d['properties']['Positions'][i]['coordinates'][0], d['properties']['Positions'][i]['coordinates'][1])[1]))
-    Construction.objects.bulk_create(construction)
-    ConstructionCoor.objects.bulk_create(constructioncoor)
-    return HttpResponse(response)
+                constructioncoor.append(models.ConstructionCoor(d['properties']['Ac_no'], i, twd97_to_lonlat(d['properties']['Positions'][i]['coordinates'][0], d['properties']['Positions'][i]['coordinates'][1])[0], twd97_to_lonlat(d['properties']['Positions'][i]['coordinates'][0], d['properties']['Positions'][i]['coordinates'][1])[1]))
+    models.Construction.objects.bulk_create(construction)
+    models.ConstructionCoor.objects.bulk_create(constructioncoor)
+    return response
 
-def getTraffic(request):
-    url = "https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/Taipei"
-    url = "https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/Taipei"
-    url = 'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/CCTV/City/Taipei'
-    data = getApiResponse(request, url)
-    data = json.loads(data.content.decode("utf-8"))
-    # for i in data['VDLives']:
-        # print(i.keys())
-    
-    return getApiResponse(request, url)
 
-def getParking(request):
+def getParking():
     bulk_create = []
     bulk_update = []
-    exist_id = Parkinglot.objects.values_list('id', flat = True)
+    exist_id = models.Parkinglot.objects.values_list('id', flat = True)
     # parking lot information
     parkingurl = "https://tcgbusfs.blob.core.windows.net/blobtcmsv/TCMSV_alldesc.json"
     response_park = requests.get(parkingurl)
@@ -89,10 +79,10 @@ def getParking(request):
     documents = df_mongo.T.to_dict().values()
     collection.insert_many(documents)
 
-    parkinglot = Parkinglot.objects.all()
+    parkinglot = models.Parkinglot.objects.all()
     for index, x in df_merge.iterrows():
         if x['id'] not in exist_id:
-            bulk_create.append(Parkinglot(x['update_time'], x['id'], x['area'], x['name'], x['summary'], x['address'], x['payex'], x['serviceTime'], x['totalcar'], x['availablecar'], x['entrancelat'], x['entrancelon']))
+            bulk_create.append(models.Parkinglot(x['update_time'], x['id'], x['area'], x['name'], x['summary'], x['address'], x['payex'], x['serviceTime'], x['totalcar'], x['availablecar'], x['entrancelat'], x['entrancelon']))
             continue
         for pkl in parkinglot:        
             if pkl.pk == x['id']:
@@ -108,9 +98,9 @@ def getParking(request):
                 pkl.entrancelat = x['entrancelat']
                 pkl.entrancelon = x['entrancelon']
                 bulk_update.append(pkl)
-    Parkinglot.objects.bulk_create(bulk_create)
-    Parkinglot.objects.bulk_update(bulk_update, ['update_time', 'area', 'name', 'summary', 'address', 'payex', 'servicetime', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon'])
-    return HttpResponse(response)
+    models.Parkinglot.objects.bulk_create(bulk_create)
+    models.Parkinglot.objects.bulk_update(bulk_update, ['update_time', 'area', 'name', 'summary', 'address', 'payex', 'servicetime', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon'])
+    return response
 
 def get_db_handle(db_name, host, port, username, password):
     client = MongoClient(host = host, port = int(port), username = username, password = password)
@@ -125,11 +115,11 @@ def getLiveVD(request):
     bulk_create = []
 
     # broken linkid
-    broken_link = TrafficLinkBroken.objects.values_list('linkid', flat = True)
+    broken_link = models.TrafficLinkBroken.objects.values_list('linkid', flat = True)
     # stoarable linkid
-    storable_link = TrafficLink.objects.values_list('linkid', flat = True)
+    storable_link = models.TrafficLink.objects.values_list('linkid', flat = True)
     # linkid already in live vd table
-    existing_link = TrafficLivevd.objects.values_list('linkid', flat = True)
+    existing_link = models.TrafficLivevd.objects.values_list('linkid', flat = True)
     
     url_liveVD = 'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/Taipei'
     data_liveVD = json.loads(getApiResponse(request, url_liveVD).content.decode("utf-8"))
@@ -165,24 +155,24 @@ def getLiveVD(request):
     collection.insert_many(documents)
     
     # bulk create
-    df_bulk_create = [TrafficLivevd(x['update_time'], x['LinkID'], x['Speed']) for index, x in df_bulk_create.iterrows()]
-    TrafficLivevd.objects.bulk_create(df_bulk_create)
+    df_bulk_create = [models.TrafficLivevd(x['update_time'], x['LinkID'], x['Speed']) for index, x in df_bulk_create.iterrows()]
+    models.TrafficLivevd.objects.bulk_create(df_bulk_create)
     
     # bulk update
     bulk_update_list = []
-    all_trafficlivd = TrafficLivevd.objects.all()
+    all_trafficlivd = models.TrafficLivevd.objects.all()
     for at in all_trafficlivd:
         for index, x in df_bulk_update.iterrows():
             if at.pk == x['LinkID']:
                 at.update_time = x['update_time']
                 at.speed = x['Speed']
                 bulk_update_list.append(at)
-    TrafficLivevd.objects.bulk_update(bulk_update_list, ['update_time', 'speed'])    
+    models.TrafficLivevd.objects.bulk_update(bulk_update_list, ['update_time', 'speed'])    
     return getApiResponse(request, url_liveVD)
 
 def getLink(request, url, LinkID):
     print('Enter get link', LinkID)
-    already_insert = TrafficLinkBroken.objects.values_list('linkid', flat = True)
+    already_insert = models.TrafficLinkBroken.objects.values_list('linkid', flat = True)
     url_link = url
     insert_list = []
     linkid = []
@@ -193,25 +183,25 @@ def getLink(request, url, LinkID):
         data_link = []
         
     if data_link:
-        insert = TrafficLink(data_link[0]['UpdateDate'], LinkID, data_link[0]['RoadName'], data_link[0]['StartPoint'], data_link[0]['MidPoint'], data_link[0]['EndPoint'])
+        insert = models.TrafficLink(data_link[0]['UpdateDate'], LinkID, data_link[0]['RoadName'], data_link[0]['StartPoint'], data_link[0]['MidPoint'], data_link[0]['EndPoint'])
         insert.save()
     elif LinkID not in already_insert:
-        TrafficLinkBroken.objects.create(linkid=LinkID)
+        models.TrafficLinkBroken.objects.create(linkid=LinkID)
     return getApiResponse(request, url_link)
 
 
 def getCCTV(request):
     url_CCTV = 'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/CCTV/City/Taipei'
     data_CCTV = json.loads(getApiResponse(request, url_CCTV).content.decode("utf-8"))
-    cctvid = TrafficCctv.objects.values_list('cctvid', flat = True)
+    cctvid = models.TrafficCctv.objects.values_list('cctvid', flat = True)
     update_time = data_CCTV['UpdateTime']
     bulk_create = []
     bulk_update = []
-    trafficcctv = TrafficCctv.objects.all()
+    trafficcctv = models.TrafficCctv.objects.all()
     for dict_CCTV in data_CCTV['CCTVs']:
         dict_CCTV['update_time'] = data_CCTV['UpdateTime']
         if dict_CCTV['CCTVID'] not in cctvid:
-            bulk_create.append(TrafficCctv(update_time, dict_CCTV['CCTVID'], dict_CCTV['VideoStreamURL'], dict_CCTV['PositionLon'], dict_CCTV['PositionLat'], dict_CCTV['RoadName']))
+            bulk_create.append(models.TrafficCctv(update_time, dict_CCTV['CCTVID'], dict_CCTV['VideoStreamURL'], dict_CCTV['PositionLon'], dict_CCTV['PositionLat'], dict_CCTV['RoadName']))
         else:
             for tc in trafficcctv:
                 if tc.pk == dict_CCTV:
@@ -222,8 +212,8 @@ def getCCTV(request):
                     tc.roadname = dict_CCTV['RoadName']               
                     bulk_update.append(tc)
 
-    TrafficCctv.objects.bulk_create(bulk_create)
-    TrafficCctv.objects.bulk_update(bulk_update, ['update_time', 'videostreamurl', 'positionlat', 'positionlon', 'roadname'])  
+    models.TrafficCctv.objects.bulk_create(bulk_create)
+    models.TrafficCctv.objects.bulk_update(bulk_update, ['update_time', 'videostreamurl', 'positionlat', 'positionlon', 'roadname'])  
     return getApiResponse(request, url_CCTV)
 
 def getAuthorizationHeader(request):
@@ -235,7 +225,7 @@ def getAuthorizationHeader(request):
         "client_secret": os.getenv('TDX_CLIENT_SECRET')}
     r = requests.post(url, headers = header, data = data)
     if r.status_code == 200:
-        return HttpResponse(r.json()['access_token'])
+        return r.json()['access_token']
     return HttpResponse(json.dumps({'token': r}))
 
 def getApiResponse(request, url):
