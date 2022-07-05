@@ -110,7 +110,7 @@ def get_db_handle(db_name, host, port, username, password):
     db = client[db_name]
     return db, client
 
-def getLiveVD(request):
+def getLiveVD():
     db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
     collection = db['vd_history']
     # information to be store or update
@@ -125,7 +125,7 @@ def getLiveVD(request):
     existing_link = models.TrafficLivevd.objects.values_list('linkid', flat = True)
     
     url_liveVD = 'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/Taipei'
-    data_liveVD = json.loads(getApiResponse(request, url_liveVD).content.decode("utf-8"))
+    data_liveVD = json.loads(getApiResponse(url_liveVD).content.decode("utf-8"))
     update_time = data_liveVD['UpdateTime']
     for vdlive in data_liveVD['VDLives']:
         for linkflow in vdlive['LinkFlows']:
@@ -139,7 +139,7 @@ def getLiveVD(request):
                 # 2. 可行性：link id 不在現有 link id 中，要另外爬
                 elif linkflow['LinkID'] not in storable_link:
                     url_link = f'https://tdx.transportdata.tw/api/basic/v2/Road/Link/LinkID/{linkflow["LinkID"]}'
-                    getLink(request, url_link, linkflow['LinkID'])
+                    getLink(url_link, linkflow['LinkID'])
                 # 3. update or create
                 elif linkflow['LinkID'] not in existing_link:
                     bulk_create.append([update_time, vdlive['VDID'], linkflow['LinkID'], lane['Speed']])
@@ -171,16 +171,16 @@ def getLiveVD(request):
                 at.speed = x['Speed']
                 bulk_update_list.append(at)
     models.TrafficLivevd.objects.bulk_update(bulk_update_list, ['update_time', 'speed'])    
-    return getApiResponse(request, url_liveVD)
+    return getApiResponse(url_liveVD)
 
-def getLink(request, url, LinkID):
+def getLink(url, LinkID):
     print('Enter get link', LinkID)
     already_insert = models.TrafficLinkBroken.objects.values_list('linkid', flat = True)
     url_link = url
     insert_list = []
     linkid = []
     try:
-        data_link = json.loads(getApiResponse(request, url_link).content.decode("utf-8"))
+        data_link = json.loads(getApiResponse(url_link).content.decode("utf-8"))
         print(data_link)
     except:
         data_link = []
@@ -190,7 +190,7 @@ def getLink(request, url, LinkID):
         insert.save()
     elif LinkID not in already_insert:
         models.TrafficLinkBroken.objects.create(linkid=LinkID)
-    return getApiResponse(request, url_link)
+    return getApiResponse(url_link)
 
 
 def getCCTV(request):
@@ -219,7 +219,7 @@ def getCCTV(request):
     models.TrafficCctv.objects.bulk_update(bulk_update, ['update_time', 'videostreamurl', 'positionlat', 'positionlon', 'roadname'])  
     return getApiResponse(request, url_CCTV)
 
-def getAuthorizationHeader(request):
+def getAuthorizationHeader():
     url = 'https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token'
     header = {"content-type":"application/x-www-form-urlencoded"}
     data = {
@@ -231,8 +231,8 @@ def getAuthorizationHeader(request):
         return r.json()['access_token']
     return HttpResponse(json.dumps({'token': r}))
 
-def getApiResponse(request, url):
-    token = getAuthorizationHeader(request)
+def getApiResponse(url):
+    token = getAuthorizationHeader()
     token = token.content.decode("utf-8")
     headers = {'authorization': f'Bearer {token}'}
     response = requests.get(url, headers = headers)
