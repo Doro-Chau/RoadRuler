@@ -129,7 +129,7 @@ class Construction(models.Model):
 
 
 class ConstructionCoor(models.Model):
-    facility_no = models.OneToOneField(Construction, models.DO_NOTHING, db_column='facility_no', primary_key=True)  # Field name made lowercase.
+    facility_no = models.OneToOneField(Construction, models.DO_NOTHING, db_column='facility_no', primary_key=True)
     road = models.IntegerField()
     lat = models.CharField(max_length=45)
     lon = models.CharField(max_length=45)
@@ -194,8 +194,8 @@ class Parkinglot(models.Model):
     address = models.CharField(max_length=255, blank=True, null=True)
     payex = models.CharField(max_length=255, blank=True, null=True)
     servicetime = models.CharField(db_column='serviceTime', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    totalcar = models.IntegerField(blank=True, null=True)
-    availablecar = models.IntegerField(blank=True, null=True)
+    totalcar = models.CharField(max_length=45, blank=True, null=True)
+    availablecar = models.CharField(max_length=45, blank=True, null=True)
     entrancelat = models.CharField(db_column='EntranceLat', max_length=45)  # Field name made lowercase.
     entrancelon = models.CharField(db_column='EntranceLon', max_length=45)  # Field name made lowercase.
 

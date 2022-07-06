@@ -68,11 +68,11 @@ def getParking():
     
     df_merge = df_park.merge(df_live, how='left', on='id')
     df_merge = df_merge[['update_time', 'id', 'area', 'name', 'summary', 'address', 'payex', 'serviceTime', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon']]
-    df_merge = df_merge.where(pd.notnull(df_merge), 99999)
+    df_merge = df_merge.where(pd.notnull(df_merge), '無提供資料')
     df_merge = df_merge[df_merge['entrancelat'] > 20]
     df_merge['name'] = df_merge['name'].str.replace(' ', '')
     # insert into mongo
-    df_mongo = df_merge[['id', 'update_time', 'totalcar', 'availablecar']]
+    df_mongo = df_merge[df_merge['update_time'].str.contains('CST')][['id', 'update_time', 'totalcar', 'availablecar']]
     db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
     collection = db['lot_history']
     documents = df_mongo.T.to_dict().values()

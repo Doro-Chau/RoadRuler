@@ -26,12 +26,16 @@ def map(request):
         lotid = urllib.parse.unquote(request.body.decode('utf-8'))
         # db.lot_history.delete_many({'update_time':{'$exists':0}})
         # print(len(mondata))
-        mondata = list(db.lot_history.find({'id':str(lotid)}))
+        mondata = list(db.lot_history.find({'id':str(lotid), 'update_time': {'$regex': '/.*CST.*/'}}))
         
         
         df_mondata = pd.DataFrame(mondata)
         df_mondata = df_mondata.drop(columns=['_id']).drop_duplicates(subset=['update_time'])
+        print(df_mondata['update_time'][0])
+        print(type(df_mondata['update_time'][0]))
+        df_mondata[['weekday', 'month', 'date', 'time', 'CST', 'year']] = df_mondata['update_time'].str.split(' ', expand=True)
         print(df_mondata)
+        print(df_mondata['update_time'][0])
         # mondata = 'aaa'
         # return mondata
     return render(request, 'map2.html')
