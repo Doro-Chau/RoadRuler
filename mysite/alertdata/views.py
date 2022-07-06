@@ -24,9 +24,14 @@ def map(request):
         db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
         collection = db['lot_history']
         lotid = urllib.parse.unquote(request.body.decode('utf-8'))
-        print(lotid)
-        mondata = list(db.lot_history.find({'id':str(lotid)}))
-        print(mondata)
+        # db.lot_history.delete_many({'update_time':{'$exists':0}})
+        # print(len(mondata))
+        mondata = list(db.lot_history.find({'id':str(lotid), 'update_time': { '$exists': 1}}))
+        
+        
+        df_mondata = pd.DataFrame(mondata)
+        df_mondata = df_mondata.drop(columns=['_id']).drop_duplicates(subset=['update_time'])
+        print(df_mondata)
         # mondata = 'aaa'
         # return mondata
     return render(request, 'map2.html')
