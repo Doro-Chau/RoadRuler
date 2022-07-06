@@ -26,7 +26,7 @@ def map(request):
         lotid = urllib.parse.unquote(request.body.decode('utf-8'))
         # db.lot_history.delete_many({'update_time':{'$exists':0}})
         # print(len(mondata))
-        mondata = list(db.lot_history.find({'id':str(lotid), 'update_time': { '$exists': 1}}))
+        mondata = list(db.lot_history.find({'id':str(lotid)}))
         
         
         df_mondata = pd.DataFrame(mondata)
