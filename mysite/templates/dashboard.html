@@ -5,19 +5,7 @@
     <meta charset="UTF-8">
     <title>Traffic Condition</title>
     <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/leaflet-routing-machine.css' %}" />
-    <script src="{% static 'js/leaflet.js' %}"></script>
-    <script src="{% static 'js/leaflet-routing-machine.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/L.Control.Locate.min.css' %}" />
-    <script src="{% static 'js/L.Control.Locate.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/MarkerCluster.Default.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/MarkerCluster.css' %}" />
-    <script src="{% static 'js/leaflet.markercluster.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/map.css' %}" />
     <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/Control.Geocoder.css' %}" />
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-    <script src="{% static 'js/plotly-2.12.1.min.js' %}"></script>
 </head>
 <body>
     
@@ -38,9 +26,8 @@
         <div class="option" id='parkinglot' onclick='getParking();'>停車場資訊</div>
         <div class="option" id='construction' onclick='getConstruction();'>道路施工</div>
     </div>
-    <div id='notshow'>
-        <div class="graph" id='graphlot'></div>
-    </div>    
+    
+    
     <script src="{% static 'js/map.js' %}"></script>
 </body>
 </html>

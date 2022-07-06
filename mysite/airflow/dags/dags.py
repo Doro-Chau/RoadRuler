@@ -3,8 +3,7 @@ from airflow.operators.python import PythonOperator
 from datetime import timedelta, datetime 
 import sys
 sys.path.append('/home/ec2-user/Project_disaster_map/mysite/alertdata/')
-from tasks import getConstruction, getParking, get_db_handle, getLiveVD, getCCTV
-
+from tasks import getParking, get_db_handle, getLiveVD
 default_args = {
         'owner': 'dorothy',
         'start_date': datetime(2022, 7, 4),

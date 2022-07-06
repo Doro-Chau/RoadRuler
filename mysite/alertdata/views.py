@@ -2,7 +2,7 @@ from .models import RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, T
 from django.shortcuts import render
 from django.http import HttpResponse
 import os, io
-import hashlib
+import urllib
 from django.core.files.storage import default_storage
 from sympy import content
 from rest_framework.response import Response
@@ -10,9 +10,25 @@ from datetime import datetime
 import boto3
 import xml.etree.ElementTree as ET
 import pandas as pd
+from geopy.geocoders import Nominatim
+from pymongo import MongoClient
 
 def map(request):
+    if request.method == 'POST':
+        # address = urllib.parse.unquote(request.body.decode('big5'))[12:]
+        # geolocator = Nominatim(user_agent = 'dorothychau')
+        # location = geolocator.geocode(address)
+        # print('location', location.address, location.latitude)
+
+        #get data from mongo db
+        db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
+        collection = db['lot_history']
     return render(request, 'map2.html')
+
+def get_db_handle(db_name, host, port, username, password):
+    client = MongoClient(host = host, port = int(port), username = username, password = password)
+    db = client[db_name]
+    return db, client
 
 def renderCctv(request):
     cctv = pd.DataFrame(list(TrafficCctv.objects.all().values()))
