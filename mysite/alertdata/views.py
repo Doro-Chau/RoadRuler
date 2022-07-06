@@ -23,12 +23,19 @@ def map(request):
         #get data from mongo db
         db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
         collection = db['lot_history']
+        lotid = urllib.parse.unquote(request.body.decode('utf-8'))
+        print(lotid)
+        mondata = list(db.lot_history.find({'id':str(lotid)}))
+        print(mondata)
+        # mondata = 'aaa'
+        # return mondata
     return render(request, 'map2.html')
 
 def get_db_handle(db_name, host, port, username, password):
     client = MongoClient(host = host, port = int(port), username = username, password = password)
     db = client[db_name]
     return db, client
+
 
 def renderCctv(request):
     cctv = pd.DataFrame(list(TrafficCctv.objects.all().values()))
@@ -77,7 +84,7 @@ def renderConstruction(reuest):
 
 def renderParking(request):
     df_parking = pd.DataFrame(list(Parkinglot.objects.all().values()))
-    df_parking = df_parking[['name', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon']]
+    df_parking = df_parking[['id', 'name', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon']]
     # df_parking = df_parking.drop(columns=['update_time', 'id', 'fareinfo', 'payex', 'address'])
     parking = df_parking.values.tolist()
     return HttpResponse(parking)
