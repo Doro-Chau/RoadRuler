@@ -15,15 +15,17 @@
     <script src="{% static 'js/leaflet.markercluster.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/map.css' %}" />
     <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
     <link rel="stylesheet" href="{% static 'css/Control.Geocoder.css' %}" />
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script src="{% static 'js/plotly-2.12.1.min.js' %}"></script>
+
 </head>
 <body>
+    <div style="display: none" id="jsonData" value="{{lot}}"></div>
     
     <h1> Road Ruler </h1>
-    <div id='map'>
-    </div>
+    <div id='map'></div>
     <div id='container'>
         <form action='' id='form' method='POST'>
             <input type='text' name='destination' id='destination' required/>

@@ -9,5 +9,6 @@ urlpatterns = [
     path('renderLivecity', views.renderLivecity),
     path('renderAlert', views.renderAlert),
     path('renderParking', views.renderParking),
-    path('renderConstruction', views.renderConstruction)
+    path('renderConstruction', views.renderConstruction),
+    path('maplot', views.maplot)
 ]

@@ -1,7 +1,7 @@
 from .models import RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot, Construction, ConstructionCoor, TrafficLinkBroken
 from django.shortcuts import render
-from django.http import HttpResponse
-import os, io
+from django.http import HttpResponse, JsonResponse
+import os, io, json
 import urllib
 from django.core.files.storage import default_storage
 from sympy import content
@@ -14,34 +14,54 @@ from geopy.geocoders import Nominatim
 from pymongo import MongoClient
 
 def map(request):
-    if request.method == 'POST':
+    return render(request, 'map2.html')
+
+def maplot(request):
+    # if request.method == 'POST':
         # address = urllib.parse.unquote(request.body.decode('big5'))[12:]
         # geolocator = Nominatim(user_agent = 'dorothychau')
         # location = geolocator.geocode(address)
         # print('location', location.address, location.latitude)
 
         #get data from mongo db
-        db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
-        collection = db['lot_history']
-        lotid = urllib.parse.unquote(request.body.decode('utf-8'))
-        # db.lot_history.delete_many({'update_time':{'$exists':0}})
-        # print(len(mondata))
-        mondata = list(db.lot_history.find({'id':str(lotid), 'update_time': {'$regex': '/.*CST.*/'}}))
-        if len(mondata) == 0:
-            print('case1', mondata)
-            return render(request, 'map2.html')
-        
-        df_mondata = pd.DataFrame(mondata)
-        print(df_mondata)
-        df_mondata = df_mondata.drop(columns=['_id']).drop_duplicates(subset=['update_time'])
-        print(df_mondata['update_time'][0])
-        print(type(df_mondata['update_time'][0]))
-        df_mondata[['weekday', 'month', 'date', 'time', 'CST', 'year']] = df_mondata['update_time'].str.split(' ', expand=True)
-        print(df_mondata)
-        print(df_mondata['update_time'][0])
-        # mondata = 'aaa'
-        # return mondata
-    return render(request, 'map2.html')
+    lotid = json.loads(request.body)['lotid']
+    print(json.loads(request.body))
+    # weekday = json.loads(request.body)['day'][:3]
+    # print(weekday)
+    weekday = 'Thu'
+    
+    db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
+    
+    # lotid = urllib.parse.unquote(request.body.decode('utf-8'))
+    # db.lot_history.delete_many({'update_time':{'$exists':0}})
+    # db.lot_history.delete_many({'update_time':99999})
+    print(lotid)
+    mondata = list(db.lot_history.find({'id':str(lotid)}))
+    if len(mondata) == 0:
+        print('case1', mondata)
+        return render(request, 'map2.html')
+    df_mondata = pd.DataFrame(mondata)
+    df_mondata = df_mondata.drop(columns=['_id']).drop_duplicates(subset=['update_time'])
+    df_mondata[['weekday', 'month', 'date', 'time', 'CST', 'year']] = df_mondata['update_time'].str.split(' ', expand=True)
+    print(len(df_mondata['time'].str.split(':', expand=True).columns))
+    df_mondata[['hr', 'min', 'sec']] = df_mondata['time'].str.split(':', expand=True)
+    df_mondata = df_mondata.groupby(['hr', 'weekday']).agg({'totalcar': 'mean', 'availablecar': 'mean'}).reset_index()
+    df_mondata = df_mondata[df_mondata['weekday']==weekday]
+    print(df_mondata)
+    dict_lot = {}
+    for index, x in df_mondata.iterrows():
+        left_lot_amount = [x['hr']] * int(x['availablecar'])
+        left_lot_percent = [x['hr']] * int(100 * int(x['availablecar']) / int(x['totalcar']))
+        if x['weekday'] in dict_lot:
+            dict_lot[x['weekday']][0].extend(left_lot_amount)
+            dict_lot[x['weekday']][1].extend(left_lot_percent)
+        else:
+            dict_lot[x['weekday']] = [-1, -1]
+            dict_lot[x['weekday']][0] = left_lot_amount
+            dict_lot[x['weekday']][1] = left_lot_percent
+    
+    
+    return JsonResponse({'lot': dict_lot}, status=200)
 
 def get_db_handle(db_name, host, port, username, password):
     client = MongoClient(host = host, port = int(port), username = username, password = password)
