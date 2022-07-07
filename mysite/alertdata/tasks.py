@@ -12,6 +12,10 @@ from django.http import HttpResponse
 import pandas as pd
 from pymongo import MongoClient
 
+def cleanMongo():
+    db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
+    db.lot_history.aggregate({'$group':{'_id':{'id': '$id', 'update_time': '$update_time'}}})
+
 def getConstruction():
     models.ConstructionCoor.objects.all().delete()
     models.Construction.objects.all().delete()

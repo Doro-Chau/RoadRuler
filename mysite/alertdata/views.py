@@ -27,9 +27,12 @@ def map(request):
         # db.lot_history.delete_many({'update_time':{'$exists':0}})
         # print(len(mondata))
         mondata = list(db.lot_history.find({'id':str(lotid), 'update_time': {'$regex': '/.*CST.*/'}}))
-        
+        if len(mondata) == 0:
+            print('case1', mondata)
+            return render(request, 'map2.html')
         
         df_mondata = pd.DataFrame(mondata)
+        print(df_mondata)
         df_mondata = df_mondata.drop(columns=['_id']).drop_duplicates(subset=['update_time'])
         print(df_mondata['update_time'][0])
         print(type(df_mondata['update_time'][0]))
