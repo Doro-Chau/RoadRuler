@@ -264,19 +264,26 @@ function getCctv(){
     .then(data => showCctv(data.slice(1, data.length-1)))
 }
 
-var markers_cctv = L.markerClusterGroup();
+// var markers_cctv = L.markerClusterGroup();
+var markers_cctv = L.markerClusterGroup({
+	iconCreateFunction: function(cluster) {
+		return L.divIcon({ html: '<b>' + cluster.getChildCount() + '</b>' });
+	}
+});
 function showCctv(object){
     if (mymap.hasLayer(markers_cctv)){
         mymap.removeLayer(markers_cctv);
+        return;
     }
-    else{
-        for (var i=0; i<object.length; i+=6){
-            var popup = "<dd>"+object[i+1]+"</dd>" + "<dd>" + object[i+6]+"</dd>" + "<dd><a href="+object[i+2]+">影像</a></dd>"
-            markers_cctv.addLayer(L.marker([object[i+4], object[i+3]])).bindPopup(popup).addTo(mymap);
-            mymap.addLayer(markers_cctv);
-        }
+    
+    for (var i=0; i<object.length; i+=6){
+        var popup = "<dd>"+object[i+1]+"</dd>" + "<dd>" + object[i+6]+"</dd>" + "<dd><a href="+object[i+2]+">影像</a></dd>"
+        markers_cctv.addLayer(L.marker([object[i+4], object[i+3]]).bindPopup(popup)).addTo(mymap);
+        mymap.addLayer(markers_cctv);
     }
 }
+
+
 
 // 壅塞狀況
 function getLivevd(){
