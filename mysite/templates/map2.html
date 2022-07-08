@@ -22,9 +22,6 @@
 
 </head>
 <body>
-    <div style="display: none" id="jsonData" value="{{lot}}"></div>
-    
-    <h1> Road Ruler </h1>
     <div id='map'></div>
     <div id='container'>
         <form action='' id='form' method='POST'>
@@ -40,9 +37,6 @@
         <div class="option" id='parkinglot' onclick='getParking();'>停車場資訊</div>
         <div class="option" id='construction' onclick='getConstruction();'>道路施工</div>
     </div>
-    <div id='notshow'>
-        <div class="graph" id='graphlot'></div>
-    </div>    
     <script src="{% static 'js/map.js' %}"></script>
 </body>
 </html>

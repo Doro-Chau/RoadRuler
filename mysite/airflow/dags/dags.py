@@ -14,7 +14,7 @@ default_args = {
         'retry_delay': timedelta(minutes=1),}
 
 
-with DAG('my_dag', start_date=datetime(2022, 7, 4), schedule_interval='* * * * *', catchup=False) as dag:
+with DAG('my_dag', start_date=datetime(2022, 7, 4), schedule_interval='*/2 * * * *', catchup=False) as dag:
     get_parkinglot = PythonOperator(
             task_id='get_parkinglot',
             python_callable=getParking
