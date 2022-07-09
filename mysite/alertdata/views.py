@@ -10,7 +10,6 @@ from datetime import datetime
 import boto3
 import xml.etree.ElementTree as ET
 import pandas as pd
-from geopy.geocoders import Nominatim
 from pymongo import MongoClient
 import calendar
 import datetime
