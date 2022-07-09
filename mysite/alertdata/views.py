@@ -53,7 +53,7 @@ def processmaplot(weekday, mondata):
             dict_lot[x['weekday']][1] = left_lot_percent
     return dict_lot
 def maplot(request):
-    db.lot_history.delete_many({'update_time':{'$exists':0}})
+    # db.lot_history.delete_many({'update_time':{'$exists':0}})
     # db.lot_history.delete_many({'update_time':99999})
     print(json.loads(request.body))
     lotid = json.loads(request.body)['lotid']

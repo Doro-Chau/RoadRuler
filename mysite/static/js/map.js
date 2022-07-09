@@ -125,12 +125,13 @@ function showParking(object){
         mymap.removeLayer(markers_parking);
     }
     else{
-        for (var i=0; i<object.length; i+=6){
-            var popup = "<dd id='lotid'>" + object[i] + "</dd><dd>" + object[i+1] + "</dd><dd>" + object[i+2] + "</dd><dd>" + object[i+3] + "</dd>'<div id='histogram'></div>'";
-            // var popup = '<div id="foo"></div>';
+        for (let i=0; i<object.length; i+=6){
+            // var popup = "<dd id='lotid'>" + object[i] + "</dd><dd>" + object[i+1] + "</dd><dd>" + object[i+2] + "</dd><dd>" + object[i+3] + "</dd>'<div id='histogram'></div>'";
+            const popup ="<div id='histogram'></div>";
+            const parkingInfo = object.slice(i, i + 4)
             markers_parking.addLayer(L.marker([object[i+4], object[i+5]])
             .bindPopup(popup)
-            .on('popupopen', renderHistogram)
+            .on('popupopen', (e)=>{renderHistogram(e, parkingInfo)})
             .on('popupclose', deleteid)
             );
         mymap.addLayer(markers_parking);
@@ -143,20 +144,20 @@ function deleteid(){
     }
 }
 // 3. send lotid and weekday to gethistogramdata and plot first graph
-async function renderHistogram(e){
-    let marker = e.popup._source._popup._content;
-    var doc = new DOMParser().parseFromString(marker, "text/html");
-    lotid = doc.getElementById('lotid').textContent;
+async function renderHistogram(e, parkingInfo){
+    console.log(parkingInfo)
+    const leafletPopUpWrapper = document.querySelector(".leaflet-popup-content-wrapper")
+    leafletPopUpWrapper.id = "leafletPopUpWrapperReplaceStyle"
+    const lotid = parkingInfo[0]
     const now = new Date();
     const today = now.getDay();
     const weekday = days[today-1]['text']
-    console.log(lotid);
     const data = await getHistogramData(lotid, weekday)
     const {lot} = data
     if (lot){
         Object.keys(lot).forEach(function(key) {
             console.log(lot[key][0])
-            histogram(lot[key][0], lotid);
+            histogram(lot[key][0], lotid, parkingInfo);
         });
     }
 }
@@ -172,7 +173,7 @@ async function getHistogramData(lotid, weekday){
     return data
 }
 
-function histogram(data, lotid){
+function histogram(data, lotid, parkginInfo){
     var trace = {
         x: data,
         type: 'histogram',
@@ -180,12 +181,13 @@ function histogram(data, lotid){
     var data = [trace];
     var layout = {
         width: 500,
-        title: 'Remaining Parking Space',
+        height: 400,
         yaxis: {title: 'number of parking space'},
         xaxis: {title: 'time'}
     };
     Plotly.newPlot('histogram', data, layout);
     createSelect()
+    createParkingInfoElement(parkginInfo)
     timerId = setInterval(()=>{
         let weekday = document.querySelector('#day-select option:checked').label;
         updateHistogramData(lotid, weekday)
@@ -202,11 +204,27 @@ async function updateHistogramData(lotid, weekday){
         }]
     var layout = {
         width: 500,
-        title: 'Remaining Parking Space',
+        height: 400,
         yaxis: {title: 'number of parking space'},
         xaxis: {title: 'time'}
     };
     Plotly.newPlot('histogram', trace, layout)
+}
+
+function createParkingInfoElement(parkingInfo){
+    const parkingName = parkingInfo[1]
+    const totalParkingNumber = parkingInfo[2]
+    const leftParkingNumber = parkingInfo[3]
+    const container = document.createElement("div")
+    container.classList.add("parking-info")
+    container.innerHTML = `
+        <div class="parking-name">${parkingName}</div>
+        <div class="total-parking">總停車位數：${totalParkingNumber}</div>
+        <div class="left-parking">剩餘車位：${leftParkingNumber}</div>
+        <div class="time-zone-parkgin">各時段剩餘車位數</div>
+    `
+    const histogram = document.querySelector("#histogram")
+    histogram.appendChild(container)
 }
 
 function createSelect(){
