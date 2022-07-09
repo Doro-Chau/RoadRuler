@@ -3,7 +3,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Traffic Condition</title>
+    <title>Road Ruler</title>
+    <link rel="icon" href="static/css/images/browser road ruler logo.svg">
     <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
     <link rel="stylesheet" href="{% static 'css/leaflet-routing-machine.css' %}" />
     <script src="{% static 'js/leaflet.js' %}"></script>
@@ -20,22 +21,26 @@
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script src="{% static 'js/plotly-2.12.1.min.js' %}"></script>
 
+    <!-- Embed Fonts: Open Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/integrate.css' %}" />
 </head>
 <body>
-    <div id='map'></div>
-    <div id='container'>
-        <form action='' id='form' method='POST'>
-            <input type='text' name='destination' id='destination' required/>
-            <button type="submit" class="submit-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewBox="0 0 48 48"><path d="M39.8 41.95 26.65 28.8q-1.5 1.3-3.5 2.025-2 .725-4.25.725-5.4 0-9.15-3.75T6 18.75q0-5.3 3.75-9.05 3.75-3.75 9.1-3.75 5.3 0 9.025 3.75 3.725 3.75 3.725 9.05 0 2.15-.7 4.15-.7 2-2.1 3.75L42 39.75Zm-20.95-13.4q4.05 0 6.9-2.875Q28.6 22.8 28.6 18.75t-2.85-6.925Q22.9 8.95 18.85 8.95q-4.1 0-6.975 2.875T9 18.75q0 4.05 2.875 6.925t6.975 2.875Z"/></svg>
+    <div id='map' style='width: 100vw; height: 100vh;'></div>
+    <img src="static/css/images/Road Ruler Logo.svg" class="road-ruler-logo">
+    <form action='' id='form' method='POST' class="search-bar-container">
+        <input type='text' name='destination' id='destination' class="search-bar" required/>
+        <button type="submit" class="search-bar-button">
+            <img src="static/css/images/search.svg" class="search-bar-icon">
         </button>
-        </form>
-    </div>
-    <div id='facility'>
-        <div class="option" id='cctv' onclick='getCctv();'>道路即時畫面</div>
-        <div class="option" id='livevd' onclick='getLivevd();'>路況壅塞程度</div>
-        <div class="option" id='parkinglot' onclick='getParking();'>停車場資訊</div>
-        <div class="option" id='construction' onclick='getConstruction();'>道路施工</div>
+    </form>
+    <div id='facility' class="map-layer-container">
+        <div class="map-layer" id='cctv' onclick='getCctv();'><img class="map-layer-icon" src="static/css/images/videocam.svg">道路即時畫面</div>
+        <div class="map-layer" id='livevd' onclick='getLivevd();'><img class="map-layer-icon" src="static/css/images/traffic.svg">路況壅塞程度</div>
+        <div class="map-layer" id='parkinglot' onclick='getParking();'><img class="map-layer-icon" src="static/css/images/parking.svg">停車場資訊</div>
+        <div class="map-layer" id='construction' onclick='getConstruction();'><img class="map-layer-icon" src="static/css/images/construction.svg">道路施工</div>
     </div>
     <script src="{% static 'js/map.js' %}"></script>
 </body>

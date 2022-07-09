@@ -1,36 +1,25 @@
-// create map
-var mymap = L.map('map').setView([25.038432, 121.832393], 11);
-var tiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+var mymap = L.map('map').setView([25.039407262686808, 121.55009336242676], 12);
+var tiles = L.tileLayer('https://tile.jawg.io/2da962d1-5c31-4de7-af98-cb2707b5955d/{z}/{x}/{y}{r}.png?access-token=eqFTq0WXVAanX9dQYEjwrh6PzZn1yn5hvxlkN4blWBWdfLqkGlNtrnsAWD4oZTwf', {
     maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
 }).addTo(mymap);
+mymap.attributionControl.addAttribution("<a href=\"https://www.jawg.io\" target=\"_blank\">&copy; Jawg</a> - <a href=\"https://www.openstreetmap.org\" target=\"_blank\">&copy; OpenStreetMap</a>&nbsp;contributors")
+let timerId = 0;
 
 // locate current position
-var lc = L.control.locate({
-    position: 'topright',
-    strings: {
-        title: "Show me where I am, yo!"
-    },
-    setView: 'always',
-    locateOptions:{
-        enableHighAccuracy: true
-    }
-}).addTo(mymap);
-lc.start();
+// var lc = L.control.locate({
+//     position: 'topright',
+//     strings: {
+//         title: "Show me where I am, yo!"
+//     },
+//     setView: 'always',
+//     locateOptions:{
+//         enableHighAccuracy: true
+//     }
+// }).addTo(mymap);
+// lc.start();
 
 // search function (navigator to be add)
-L.Control.geocoder().addTo(mymap);
-
-// click and navigate (still have bug)
-mymap.on('click', function(e){
-    let destination = [e.latlng.lat, e.latlng.lng];
-    var clickmarker = L.marker(destination).addTo(mymap);
-    navigator.geolocation.watchPosition(position => {
-        console.log(position);
-        let start = [position.coords.latitude, position.coords.longitude];
-        roadplan(start, clickmarker);
-    });
-})
+// L.Control.geocoder().addTo(mymap);
 
 function getPosition(value){
     console.log(value);
@@ -142,30 +131,38 @@ function showParking(object){
             markers_parking.addLayer(L.marker([object[i+4], object[i+5]])
             .bindPopup(popup)
             .on('popupopen', renderHistogram)
+            .on('popupclose', deleteid)
             );
         mymap.addLayer(markers_parking);
         }
+    }
+}
+function deleteid(){
+    if (timerId) {
+        clearInterval(timerId)
     }
 }
 // 3. send lotid and weekday to gethistogramdata and plot first graph
 async function renderHistogram(e){
     let marker = e.popup._source._popup._content;
     var doc = new DOMParser().parseFromString(marker, "text/html");
-    var lotid = doc.getElementById('lotid').textContent;
+    lotid = doc.getElementById('lotid').textContent;
     const now = new Date();
     const today = now.getDay();
     const weekday = days[today-1]['text']
-    console.log('render', weekday);
+    console.log(lotid);
     const data = await getHistogramData(lotid, weekday)
     const {lot} = data
     if (lot){
         Object.keys(lot).forEach(function(key) {
+            console.log(lot[key][0])
             histogram(lot[key][0], lotid);
         });
     }
 }
 
 async function getHistogramData(lotid, weekday){
+    console.log(lotid);
     const res = await fetch("/maplot", {
         method:"POST",
         headers:{'Content-type':'application/json'},
@@ -176,7 +173,6 @@ async function getHistogramData(lotid, weekday){
 }
 
 function histogram(data, lotid){
-    // var gd = document.getElementById('histogram');
     var trace = {
         x: data,
         type: 'histogram',
@@ -190,9 +186,8 @@ function histogram(data, lotid){
     };
     Plotly.newPlot('histogram', data, layout);
     createSelect()
-    setInterval(()=>{
+    timerId = setInterval(()=>{
         let weekday = document.querySelector('#day-select option:checked').label;
-        console.log(weekday);
         updateHistogramData(lotid, weekday)
     }, 10000)
 }
@@ -201,7 +196,6 @@ async function updateHistogramData(lotid, weekday){
     const data = await getHistogramData(lotid, weekday);
     const {lot} = data;
     if (!lot) return
-    console.log(lot[Object.keys(lot)[0]][0]);
     const trace = [{
         x: lot[Object.keys(lot)[0]][0],
         type: 'histogram'
@@ -212,13 +206,11 @@ async function updateHistogramData(lotid, weekday){
         yaxis: {title: 'number of parking space'},
         xaxis: {title: 'time'}
     };
-    // Plotly.restyle('histogram',[[3,3,5,6,3,4,8]])
     Plotly.newPlot('histogram', trace, layout)
 }
 
 function createSelect(){
     const histogram = document.querySelector(".user-select-none.svg-container")
-    console.log(histogram)
     const container = document.createElement("div")
     container.classList.add("day-select-container")
     const select = document.createElement("select")
@@ -251,7 +243,6 @@ function createSelect(){
     dayselect.addEventListener('input', (e) => {
         e.preventDefault();
         let weekday = e.target.value;
-        console.log(weekday);
         updateHistogramData(lotid, weekday);
     })
 }
@@ -267,7 +258,11 @@ function getCctv(){
 // var markers_cctv = L.markerClusterGroup();
 var markers_cctv = L.markerClusterGroup({
 	iconCreateFunction: function(cluster) {
-		return L.divIcon({ html: '<b>' + cluster.getChildCount() + '</b>' });
+        var markers = cluster.getAllChildMarkers();
+        // '<div class="circle">' + markers.length + '</div><div>'
+        var html = '<b>' + cluster.getChildCount() + '</b>';
+        // console.log(markers);
+		return L.divIcon({html: html});
 	}
 });
 function showCctv(object){
@@ -277,7 +272,7 @@ function showCctv(object){
     }
     
     for (var i=0; i<object.length; i+=6){
-        var popup = "<dd>"+object[i+1]+"</dd>" + "<dd>" + object[i+6]+"</dd>" + "<dd><a href="+object[i+2]+">影像</a></dd>"
+        var popup = "<dd>" + object[i+5]+"</dd>" + "<dd><a href="+object[i+2]+">即時畫面</a></dd>"
         markers_cctv.addLayer(L.marker([object[i+4], object[i+3]]).bindPopup(popup)).addTo(mymap);
         mymap.addLayer(markers_cctv);
     }
@@ -330,4 +325,3 @@ var polygon = L.polygon([
     [51.503, -0.06],
     [51.51, -0.047]
 ]).addTo(mymap);
-
