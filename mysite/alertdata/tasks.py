@@ -48,6 +48,8 @@ def getParking():
     # parking lot information
     parkingurl = "https://tcgbusfs.blob.core.windows.net/blobtcmsv/TCMSV_alldesc.json"
     response_park = requests.get(parkingurl)
+    print('responsepark', response_park)
+    print(type(response_park))
     parkdata = response_park.json()['data']
     df_park = pd.DataFrame(parkdata['park'])
     df_park["tw97x"] = pd.to_numeric(df_park["tw97x"])
