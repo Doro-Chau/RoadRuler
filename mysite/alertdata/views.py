@@ -27,19 +27,19 @@ def processmaplot(weekday, mondata):
     df_mondata[['weekday', 'month', 'date', 'time', 'CST', 'year']] = df_mondata['update_time'].str.split(' ', expand=True)
     df_mondata[['hr', 'min', 'sec']] = df_mondata['time'].str.split(':', expand=True)
     df_mondata = df_mondata.groupby(['hr', 'weekday']).agg({'totalcar': 'mean', 'availablecar': 'mean'}).reset_index()
-    if weekday != ('平日' or '假日'):
+    
+    if (weekday != '平日') and (weekday != '假日'):
         df_mondata = df_mondata[df_mondata['weekday']==weekday]
-        
+    
     elif weekday == '假日':
         df_mondata = df_mondata[(df_mondata['weekday']=='Sat')|(df_mondata['weekday']=='Sun')]
         df_mondata['weekday'] = '假日'
         df_mondata = df_mondata.groupby(['hr', 'weekday']).agg({'totalcar': 'mean', 'availablecar': 'mean'}).reset_index()
-        
+        print(df_mondata)
     elif weekday == '平日':
         df_mondata = df_mondata[(df_mondata['weekday']!='Sat')&(df_mondata['weekday']!='Sun')]
         df_mondata['weekday'] = '平日'
         df_mondata = df_mondata.groupby(['hr', 'weekday']).agg({'totalcar': 'mean', 'availablecar': 'mean'}).reset_index()
-        
     dict_lot = {}
     for index, x in df_mondata.iterrows():
         left_lot_amount = [x['hr']] * int(x['availablecar'])
@@ -53,7 +53,7 @@ def processmaplot(weekday, mondata):
             dict_lot[x['weekday']][1] = left_lot_percent
     return dict_lot
 def maplot(request):
-    # db.lot_history.delete_many({'update_time':{'$exists':0}})
+    db.lot_history.delete_many({'update_time':{'$exists':0}})
     # db.lot_history.delete_many({'update_time':99999})
     print(json.loads(request.body))
     lotid = json.loads(request.body)['lotid']
