@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{% static 'css/MarkerCluster.Default.css' %}" />
     <link rel="stylesheet" href="{% static 'css/MarkerCluster.css' %}" />
     <script src="{% static 'js/leaflet.markercluster.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/map.css' %}" />
+    
     <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
     <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
     <link rel="stylesheet" href="{% static 'css/Control.Geocoder.css' %}" />
@@ -29,7 +29,7 @@
 </head>
 <body>
     <div id='map' style='width: 100vw; height: 100vh;'></div>
-    <img src="static/css/images/Road Ruler Logo.svg" class="road-ruler-logo">
+    <img src="static/css/images/Road Ruler Logo.svg" class="road-ruler-logo"> 
     <form action='' id='form' method='POST' class="search-bar-container">
         <input type='text' name='destination' id='destination' class="search-bar" required/>
         <button type="submit" class="search-bar-button">
@@ -37,10 +37,10 @@
         </button>
     </form>
     <div id='facility' class="map-layer-container">
-        <div class="map-layer" id='cctv' onclick='getCctv();'><img class="map-layer-icon" src="static/css/images/videocam.svg">道路即時畫面</div>
-        <div class="map-layer" id='livevd' onclick='getLivevd();'><img class="map-layer-icon" src="static/css/images/traffic.svg">路況壅塞程度</div>
-        <div class="map-layer" id='parkinglot' onclick='getParking();'><img class="map-layer-icon" src="static/css/images/parking.svg">停車場資訊</div>
-        <div class="map-layer" id='construction' onclick='getConstruction();'><img class="map-layer-icon" src="static/css/images/construction.svg">道路施工</div>
+        <div class="map-layer map-layer-inactive" id='cctv' data-clicked='false' onclick='getCctv();'><img class="map-layer-icon" src="static/css/images/videocam.svg">道路即時畫面</div>
+        <div class="map-layer map-layer-inactive" id='livevd' data-clicked='false' onclick='getLivevd();'><img class="map-layer-icon" src="static/css/images/traffic.svg">路況壅塞程度</div>
+        <div class="map-layer map-layer-inactive" id='parkinglot' data-clicked='false' onclick='getParking();'><img class="map-layer-icon" src="static/css/images/parking.svg">停車場資訊</div>
+        <div class="map-layer map-layer-inactive" id='construction' data-clicked='false' onclick='getConstruction();'><img class="map-layer-icon" src="static/css/images/construction.svg">道路施工</div>
     </div>
     <script src="{% static 'js/map.js' %}"></script>
 </body>

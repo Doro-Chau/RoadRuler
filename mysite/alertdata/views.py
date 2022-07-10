@@ -68,7 +68,7 @@ def maplot(request):
     mondata = list(db.lot_history.find({'id':str(lotid)}))
     if len(mondata) == 0:
         print('case1', mondata)
-        return render(request, 'map2.html')
+        return JsonResponse({'lot': {'weekday': [[],[]]}}, status = 200)
     dict_lot = processmaplot(weekday, mondata)
     return JsonResponse({'lot': dict_lot}, status=200)
 

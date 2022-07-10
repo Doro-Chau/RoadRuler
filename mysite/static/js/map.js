@@ -102,13 +102,13 @@ function showConstruction(object){
 
 // 停車場
 const days = [
+    {value:"sunday",text:"Sunday"},
     {value:"monday",text:"Monday"},
     {value:"tuesday",text:"Tuesday"},
     {value:"wednesday",text:"Wednesday"},
     {value:"thursday",text:"Thursday"},
     {value:"friday",text:"Friday"},
     {value:"saturday",text:"Saturday"},
-    {value:"sunday",text:"Sunday"},
 ]
 // 1. 被觸發，拿資料
 function getParking(){
@@ -151,7 +151,9 @@ async function renderHistogram(e, parkingInfo){
     const lotid = parkingInfo[0]
     const now = new Date();
     const today = now.getDay();
-    const weekday = days[today-1]['text']
+    console.log(today, days)
+    const weekday = days[today]['text']
+    console.log(weekday)
     const data = await getHistogramData(lotid, weekday)
     const {lot} = data
     if (lot){
@@ -180,8 +182,8 @@ function histogram(data, lotid, parkginInfo){
     };
     var data = [trace];
     var layout = {
-        width: 500,
-        height: 400,
+        width: 350,
+        height: 250,
         yaxis: {title: 'number of parking space'},
         xaxis: {title: 'time'}
     };
@@ -203,10 +205,10 @@ async function updateHistogramData(lotid, weekday){
         type: 'histogram'
         }]
     var layout = {
-        width: 500,
-        height: 400,
-        yaxis: {title: 'number of parking space'},
-        xaxis: {title: 'time'}
+        width: 350,
+        height: 250,
+        yaxis: {title: '剩餘車位'},
+        xaxis: {title: '時間'}
     };
     Plotly.newPlot('histogram', trace, layout)
 }
@@ -328,3 +330,15 @@ function showLivevd(object){
         mymap.addLayer(markers_vd);
     }
 }
+
+document.querySelectorAll('.map-layer').forEach(item => {
+    item.addEventListener('click', function() {
+        if (item.getAttribute('data-clicked') === "true") {
+            item.setAttribute('data-clicked', "false");
+            item.classList = 'map-layer map-layer-inactive';
+        } else if (item.getAttribute('data-clicked') === "false") {
+            item.setAttribute('data-clicked', "true");
+            item.classList = 'map-layer map-layer-active';
+        }
+    });
+})

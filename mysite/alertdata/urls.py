@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path('getData', views.getData),
-    path('map', views.map),
+    path('', views.map),
     path('renderCctv', views.renderCctv),
     path('renderLivevd', views.renderLivevd),
     path('renderLivecity', views.renderLivecity),
