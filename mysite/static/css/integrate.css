@@ -62,8 +62,9 @@ img {
   height: 60px;
   filter: none;
 }
-.leaflet-control-geocoder{
-    display: none;
+.leaflet-control-geocoder.leaflet-bar.leaflet-control{
+  position: relative;
+  left: 40%;
 }
 .leaflet-touch .leaflet-bar {
     border: none;

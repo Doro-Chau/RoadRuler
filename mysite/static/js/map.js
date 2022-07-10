@@ -19,45 +19,45 @@ let timerId = 0;
 // lc.start();
 
 // search function (navigator to be add)
-// L.Control.geocoder().addTo(mymap);
+L.Control.geocoder().addTo(mymap);
 
 function getPosition(value){
     console.log(value);
 }
 
 // self made navigation bar
-var form = document.getElementById('form');
-var destination = document.getElementById('destination');
-form.addEventListener('submit', (e) => {
-    console.log("submit")
-    e.preventDefault();
-    try{
-        var value = destination.value.split(',');
-        value = value.map(Number);
-        L.marker(value).addTo(mymap);
-    }
-    catch{
-        $.ajax({
-            url: '/map',
-            type: 'POST',
-            contentType: 'application/json',
-            data: $("#destination"),
-            success: function(){
-                console.log('success')
-            },
-            error: function(){
-                console.log('error')
-            }
-        });
-    }
+// var form = document.getElementById('form');
+// var destination = document.getElementById('destination');
+// form.addEventListener('submit', (e) => {
+//     console.log("submit")
+//     e.preventDefault();
+//     try{
+//         var value = destination.value.split(',');
+//         value = value.map(Number);
+//         L.marker(value).addTo(mymap);
+//     }
+//     catch{
+//         $.ajax({
+//             url: '/map',
+//             type: 'POST',
+//             contentType: 'application/json',
+//             data: $("#destination"),
+//             success: function(){
+//                 console.log('success')
+//             },
+//             error: function(){
+//                 console.log('error')
+//             }
+//         });
+//     }
     
-    navigator.geolocation.watchPosition(position => {
-        console.log(position);
-        var start = [position.coords.latitude, position.coords.longitude];
-        console.log(start[0], start[1], value[0], value[1]);
-        roadplan(start, value);
-    });
-})
+//     navigator.geolocation.watchPosition(position => {
+//         console.log(position);
+//         var start = [position.coords.latitude, position.coords.longitude];
+//         console.log(start[0], start[1], value[0], value[1]);
+//         roadplan(start, value);
+//     });
+// })
 
 // road planning
 function roadplan(start, end){
