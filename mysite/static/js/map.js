@@ -134,7 +134,7 @@ function showConstruction(object){
         for (let i=0; i<object.length; i+=5){
             if (object[i+2] != temp_road){
                 if (i!=0){
-                    var popup = "<dd>" + object[i] + "</dd><dd>" + object[i+1] + "</dd><dd>" + object[i+2] + "</dd>";
+                    var popup = "<dd>" + object[i+1] + "</dd><dd> 路段編號" + object[i+2] + "</dd>";
                     markers_construction.addLayer(L.polyline(line).bindPopup(popup)).addTo(mymap);
                 }
                 temp_road = object[i+2];
@@ -340,7 +340,7 @@ function showCctv(object){
     }
     
     for (var i=0; i<object.length; i+=6){
-        var popup = "<dd>" + object[i+5]+"</dd>" + "<dd><a href="+object[i+2]+">即時畫面</a></dd>"
+        var popup = "<dd>" + object[i+5]+"</dd>" + "<dd><a href="+object[i+2]+" target='_blank'>即時畫面</a></dd>"
         markers_cctv.addLayer(L.marker([object[i+4], object[i+3]]).bindPopup(popup)).addTo(mymap);
         mymap.addLayer(markers_cctv);
     }

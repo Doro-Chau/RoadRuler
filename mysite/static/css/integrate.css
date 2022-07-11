@@ -18,9 +18,10 @@
 }
 
 #day-select {
-  width: 115px;
+  width: 85px;
   padding: 5px 8px;
   border-radius: 8px;
+  margin-right: 45px;
 }
 
 .parking-info {
@@ -278,7 +279,7 @@ html {
   transition: background-color 0.1s;
 }
 .map-layer-active {
-  background-color: #7e5400;
+  background-color: #a06c03;
   transition: background-color 0.1s;
 }
 
