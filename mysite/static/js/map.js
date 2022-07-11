@@ -69,6 +69,20 @@ function roadplan(start, end){
     }).addTo(mymap);
 }
 
+// 示警
+function openNav() {
+    document.getElementById("mySidebar").style.width = "250px";
+    const text = getAlert();
+    console.log(text)
+    document.getElementById("alert-info").appendChild(text);
+}
+function closeNav() {
+    document.getElementById("mySidebar").style.width = "0";
+}
+function getAlert(){
+    return fetch('/renderAlert')
+}
+
 // 施工
 function getConstruction(){
     return fetch('/renderConstruction')
@@ -336,9 +350,15 @@ document.querySelectorAll('.map-layer').forEach(item => {
         if (item.getAttribute('data-clicked') === "true") {
             item.setAttribute('data-clicked', "false");
             item.classList = 'map-layer map-layer-inactive';
+            if(item.getAttribute('id') === 'livevd') {
+                document.getElementById('map-legend-container').style = 'display: none';
+            }
         } else if (item.getAttribute('data-clicked') === "false") {
             item.setAttribute('data-clicked', "true");
             item.classList = 'map-layer map-layer-active';
+            if(item.getAttribute('id') === 'livevd') {
+                document.getElementById('map-legend-container').style = 'display: flex';
+            }
         }
     });
 })

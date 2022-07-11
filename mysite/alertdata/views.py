@@ -6,7 +6,6 @@ import urllib
 from django.core.files.storage import default_storage
 from sympy import content
 from rest_framework.response import Response
-from datetime import datetime
 import boto3
 import xml.etree.ElementTree as ET
 import pandas as pd
@@ -107,9 +106,8 @@ def renderLivecity(request):
     return HttpResponse(merge)
 
 def renderAlert(request):
-    df_alert = pd.DataFrame(list(AlertLocation.objects.filter(expires__gt=datetime.now()).values()))
-    df_alert = df_alert.drop(columns=['alert_id', 'severity_level', 'alert_critiria'])
-    df_alert.to_csv('a.csv')
+    df_alert = pd.DataFrame(list(AlertLocation.objects.filter(expires__gt=datetime.datetime.now()).values()))
+    df_alert = df_alert[['location', 'event', 'description', 'effective', 'expires']]
     print(df_alert)
     return HttpResponse(df_alert)
 
@@ -137,7 +135,7 @@ def getData(request):
         #filename = default_storage.save(workpath, file)
         
         workpath = 'mymap/realtime_alert/'
-        now = datetime.now()
+        now = datetime.datetime.now()
         now = now.strftime("%Y%m%d-%H-%M-%S")
         workpath = os.path.join(workpath, now)
         client = boto3.client('s3', aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))

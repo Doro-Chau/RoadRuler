@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="{% static 'css/MarkerCluster.Default.css' %}" />
     <link rel="stylesheet" href="{% static 'css/MarkerCluster.css' %}" />
     <script src="{% static 'js/leaflet.markercluster.js' %}"></script>
-    
     <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
     <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
     <link rel="stylesheet" href="{% static 'css/Control.Geocoder.css' %}" />
@@ -37,7 +36,24 @@
         <div class="map-layer map-layer-inactive" id='parkinglot' data-clicked='false' onclick='getParking();'><img class="map-layer-icon" src="static/css/images/parking.svg">停車場資訊</div>
         <div class="map-layer map-layer-inactive" id='construction' data-clicked='false' onclick='getConstruction();'><img class="map-layer-icon" src="static/css/images/construction.svg">道路施工</div>
     </div>
-    
+
+    <div style="display: flex; justify-content: right;">
+        <div class='openbtn' onclick='openNav();'><img class="map-layer-icon" src="static/css/images/alert.svg"></div>
+    </div>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div id='alert-info'></div>
+    </div>
+
+    <div style="display: flex; justify-content: center;">
+        <div class="map-legend-container" id="map-legend-container" style="display: none">
+            <div class="map-legend-text">順暢</div>
+            <div style="background-color: rgb(98, 213, 104, 0.7); width: 14px; height: 14px; margin: 0 3px"></div>
+            <div style="background-color: rgb(255, 151, 77, 0.7); width: 14px; height: 14px; margin: 0 3px"></div>
+            <div style="background-color: rgb(242, 60, 50, 0.7); width: 14px; height: 14px; margin: 0 3px"></div>
+            <div style="background-color: rgb(129, 31, 31, 0.7); width: 14px; height: 14px; margin: 0 3px"></div>
+        <div class="map-legend-text">壅塞</div>
+    </div>
     <script src="{% static 'js/map.js' %}"></script>
 </body>
 </html>
