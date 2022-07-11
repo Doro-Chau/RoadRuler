@@ -157,14 +157,14 @@ path.leaflet-interactive {
 }
 
 .sidebar {
-  display: flex;
+  display:inline-block;
   height: 100%; /* 100% Full-height */
   width: 0; /* 0 width - change this with JavaScript */
   position: fixed; /* Stay in place */
   z-index: 1000; /* Stay on top */
   top: 24%;
   right: 0;
-  background-color: rgba(51, 51, 51, 0.757); /* Black*/
+  background-color: #BFBFBF;
   overflow-x: hidden; /* Disable horizontal scroll */
   padding-top: 60px; /* Place content 60px from the top */
   transition: 0.5s; /* 0.5 second transition effect to slide in the sidebar */
@@ -172,14 +172,35 @@ path.leaflet-interactive {
 #alert-info {
   text-align: center;
   position: relative;
+  background-color:white;
+}
+.alert-title {
+  display: inline-block;
+  color: #FFF;
+  font-size: 20px;
+}
+.alert-type {
+  color: gray;
+  text-align: left;
+  font-size: 20px;
+  padding: 1px 0px 0px 6px;
+}
+.alert-location {
+  text-align: left;
+  padding: 1px 0px 0px 6px;
+}
+.alert-description {
+  
 }
 .sidebar .closebtn {
+  display: flex;
   position: absolute;
   top: 0;
   right: 210px;
   font-size: 36px;
   margin-left: 50px;
-  color:rgb(191, 191, 191);
+  color:#333;
+  cursor: pointer;
 }
 .openbtn {
   display: flex;

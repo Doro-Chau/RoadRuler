@@ -72,15 +72,45 @@ function roadplan(start, end){
 // 示警
 function openNav() {
     document.getElementById("mySidebar").style.width = "250px";
-    const text = getAlert();
-    console.log(text)
-    document.getElementById("alert-info").appendChild(text);
+    getAlert();    
 }
 function closeNav() {
     document.getElementById("mySidebar").style.width = "0";
 }
 function getAlert(){
     return fetch('/renderAlert')
+    .then(res => res.text())
+    .then(res2 => res2.split(/[,'\s\[\]]+/))
+    .then(data => showAlert(data.slice(1, data.length-1)))
+}
+function showAlert(object){
+    console.log(object);
+    document.getElementById('mySidebar').innerHTML='';
+    var close= document.createElement('span')
+    close.className = 'closebtn'
+    close.addEventListener("click", closeNav)
+    close.innerHTML='&times;';
+    document.getElementById('mySidebar').appendChild(close);
+    var alerttitle = document.createElement('span');
+    // alerttitle.className = 'alert-title-container'
+    alerttitle.className = 'alert-title'
+    alerttitle.innerHTML='綜合警戒';
+    document.getElementById('mySidebar').appendChild(alerttitle);
+    const alertinfo = document.createElement("section")
+    alertinfo.id = "alert-info"
+    console.log(alertinfo)
+    for (let i=0; i<object.length; i+=3){
+        var text = document.createElement('div');
+        text.innerHTML = `
+        <p class="alert-type">${object[i+1]}警戒</p>
+        <p class="alert-location">${object[i]}</p>
+        <p class="alert-description">${object[i+2]}</p>
+        <hr></hr>
+        `
+        alertinfo.appendChild(text);
+    }
+
+    document.getElementById('mySidebar').appendChild(alertinfo);
 }
 
 // 施工
@@ -311,7 +341,6 @@ function showCctv(object){
         mymap.addLayer(markers_cctv);
     }
 }
-
 
 
 // 壅塞狀況

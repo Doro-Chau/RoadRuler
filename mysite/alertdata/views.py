@@ -106,10 +106,12 @@ def renderLivecity(request):
     return HttpResponse(merge)
 
 def renderAlert(request):
-    df_alert = pd.DataFrame(list(AlertLocation.objects.filter(expires__gt=datetime.datetime.now()).values()))
-    df_alert = df_alert[['location', 'event', 'description', 'effective', 'expires']]
+    df_alert = pd.DataFrame(list(AlertLocation.objects.filter(expires__gt=(datetime.datetime.now()+datetime.timedelta(hours=8)), location__contains = '臺北').values()))
+    df_alert = df_alert[['location', 'event', 'description']]
+    df_alert = df_alert.drop_duplicates()
+    alert = df_alert.values.tolist()
     print(df_alert)
-    return HttpResponse(df_alert)
+    return HttpResponse(alert)
 
 def renderConstruction(reuest):
     df_construction = pd.DataFrame(list(Construction.objects.all().values()))
@@ -136,6 +138,8 @@ def getData(request):
         
         workpath = 'mymap/realtime_alert/'
         now = datetime.datetime.now()
+        time_del = datetime.timedelta(hours=8) 
+        now = now + time_del
         now = now.strftime("%Y%m%d-%H-%M-%S")
         workpath = os.path.join(workpath, now)
         client = boto3.client('s3', aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
