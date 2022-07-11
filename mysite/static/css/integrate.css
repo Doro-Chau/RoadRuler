@@ -46,7 +46,6 @@
 
 * {
   margin: 0;
-  font-family: "Open Sans", sans-serif;
 }
 
 img {
@@ -164,9 +163,7 @@ path.leaflet-interactive {
   z-index: 1000; /* Stay on top */
   top: 24%;
   right: 0;
-  background-color: #BFBFBF;
   overflow-x: hidden; /* Disable horizontal scroll */
-  padding-top: 60px; /* Place content 60px from the top */
   transition: 0.5s; /* 0.5 second transition effect to slide in the sidebar */
 }
 #alert-info {
@@ -180,32 +177,58 @@ path.leaflet-interactive {
   font-size: 20px;
 }
 .alert-type {
-  color: gray;
+  color: #F0A202;
   text-align: left;
   font-size: 20px;
   padding: 1px 0px 0px 6px;
+  font-weight: 700;
 }
 .alert-location {
   text-align: left;
   padding: 1px 0px 0px 6px;
+  font-size: 14px;
+  color: #555;
 }
-.alert-description {
-  
-}
-.sidebar .closebtn {
+
+.innerdiv {
   display: flex;
-  position: absolute;
-  top: 0;
-  right: 210px;
-  font-size: 36px;
-  margin-left: 50px;
-  color:#333;
-  cursor: pointer;
+  background-color: #F0A202;
+  align-items: center;
+  padding: 5px 0px;
 }
+
+html {
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+.alert-description {
+  color: #888;
+  font-size: 12px;
+  text-align: left;
+  padding: 0px 0px 0px 6px;
+}
+.closebtn {
+  font-size: 18px;
+  color:#FFF;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  margin: 0px 10px 0px 5px;
+}
+
+.closebtn:hover { 
+  background: #fff7;
+}
+
+
 .openbtn {
   display: flex;
   position: fixed;
-  bottom: 385px;
+  top: 125px;
   z-index: 1000;
   background-color: white;
   box-shadow: 2px 2px rgb(93, 93, 93);
@@ -251,11 +274,11 @@ path.leaflet-interactive {
   cursor: pointer;
 }
 .map-layer-inactive {
-  background-color: rgb(191, 191, 191);
+  background-color: #F0A202;
   transition: background-color 0.1s;
 }
 .map-layer-active {
-  background-color: gray;
+  background-color: #7e5400;
   transition: background-color 0.1s;
 }
 
@@ -270,7 +293,6 @@ path.leaflet-interactive {
   background-color: rgba(110, 204, 57, 0.8);
   width: 28.5px;
   height: 28.5px;
-  font-family: "Open Sans";
   font-weight: bold;
   font-size: 1rem;
   color: #4d4d4d;
@@ -287,7 +309,6 @@ path.leaflet-interactive {
   background-color: rgba(240, 194, 12, 0.8);
   width: 28.5px;
   height: 28.5px;
-  font-family: "Open Sans";
   font-weight: bold;
   font-size: 1rem;
   color: #4d4d4d;
@@ -304,7 +325,6 @@ path.leaflet-interactive {
   background-color: rgba(241, 128, 23, 0.8);
   width: 28.5px;
   height: 28.5px;
-  font-family: "Open Sans";
   font-weight: bold;
   font-size: 0.75rem;
   color: #4d4d4d;
@@ -337,7 +357,6 @@ path.leaflet-interactive {
   background-color: rgba(9, 174, 240, 0.834);
   width: 28.5px;
   height: 25.5px;
-  font-family: "Open Sans", sans-serif;
   font-weight: bold;
   font-size: 1rem;
   color: #4d4d4d;

@@ -85,17 +85,20 @@ function getAlert(){
 }
 function showAlert(object){
     console.log(object);
-    document.getElementById('mySidebar').innerHTML='';
+    const innerDiv = document.createElement('div');
+    const mySidebar = document.getElementById('mySidebar')
+    innerDiv.className = 'innerdiv';
+    mySidebar.innerHTML='';
     var close= document.createElement('span')
     close.className = 'closebtn'
     close.addEventListener("click", closeNav)
     close.innerHTML='&times;';
-    document.getElementById('mySidebar').appendChild(close);
+    innerDiv.appendChild(close);
     var alerttitle = document.createElement('span');
     // alerttitle.className = 'alert-title-container'
     alerttitle.className = 'alert-title'
     alerttitle.innerHTML='綜合警戒';
-    document.getElementById('mySidebar').appendChild(alerttitle);
+    innerDiv.appendChild(alerttitle);
     const alertinfo = document.createElement("section")
     alertinfo.id = "alert-info"
     console.log(alertinfo)
@@ -110,7 +113,8 @@ function showAlert(object){
         alertinfo.appendChild(text);
     }
 
-    document.getElementById('mySidebar').appendChild(alertinfo);
+    mySidebar.appendChild(innerDiv);
+    mySidebar.appendChild(alertinfo)
 }
 
 // 施工
