@@ -232,8 +232,8 @@ function histogram(data, lotid, parkginInfo){
     var layout = {
         width: 350,
         height: 250,
-        yaxis: {title: 'number of parking space'},
-        xaxis: {title: 'time'}
+        yaxis: {title: '數量'},
+        xaxis: {title: '時間'}
     };
     Plotly.newPlot('histogram', data, layout);
     createSelect()
@@ -255,7 +255,7 @@ async function updateHistogramData(lotid, weekday){
     var layout = {
         width: 350,
         height: 250,
-        yaxis: {title: '剩餘車位'},
+        yaxis: {title: '數量'},
         xaxis: {title: '時間'}
     };
     Plotly.newPlot('histogram', trace, layout)
@@ -298,7 +298,7 @@ function createSelect(){
         const dayOption = document.createElement("option")
         dayOption.setAttribute("value", day.value)
         dayOption.textContent = day.text
-        if (today -1 === index) {
+        if (today === index) {
             dayOption.setAttribute("selected", true)
         }
         dayOptgroup.appendChild(dayOption)
