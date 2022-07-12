@@ -70,7 +70,6 @@ def getParking():
     
     df_merge = df_park.merge(df_live, how='left', on='id')
     df_merge = df_merge[['update_time', 'id', 'area', 'name', 'summary', 'address', 'payex', 'serviceTime', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon']]
-    df_merge = df_merge.astype({"availablecar": int})
     df_merge = df_merge.where(pd.notnull(df_merge), '無提供資料')
     df_merge = df_merge[df_merge['entrancelat'] > 20]
     df_merge['name'] = df_merge['name'].str.replace(' ', '')

@@ -123,6 +123,8 @@ def renderConstruction(reuest):
 def renderParking(request):
     df_parking = pd.DataFrame(list(Parkinglot.objects.all().values()))
     df_parking = df_parking[['id', 'name', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon']]
+    df_parking[df_parking['availablecar']!='無提供資料'] = df_parking[df_parking['availablecar']!='無提供資料'].astype({"availablecar": float})
+    df_parking[df_parking['availablecar']!='無提供資料'] = df_parking[df_parking['availablecar']!='無提供資料'].astype({"availablecar": int})
     # df_parking = df_parking.drop(columns=['update_time', 'id', 'fareinfo', 'payex', 'address'])
     parking = df_parking.values.tolist()
     return HttpResponse(parking)

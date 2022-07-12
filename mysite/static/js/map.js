@@ -177,7 +177,10 @@ function showParking(object){
             // var popup = "<dd id='lotid'>" + object[i] + "</dd><dd>" + object[i+1] + "</dd><dd>" + object[i+2] + "</dd><dd>" + object[i+3] + "</dd>'<div id='histogram'></div>'";
             const popup ="<div id='histogram'></div>";
             const parkingInfo = object.slice(i, i + 4)
-            markers_parking.addLayer(L.marker([object[i+4], object[i+5]])
+            const myIcon = L.icon({
+                iconUrl: 'static/css/images/parking-pin.svg'
+            });
+            markers_parking.addLayer(L.marker([object[i+4], object[i+5]], { icon: myIcon })
             .bindPopup(popup)
             .on('popupopen', (e)=>{renderHistogram(e, parkingInfo)})
             .on('popupclose', deleteid)
