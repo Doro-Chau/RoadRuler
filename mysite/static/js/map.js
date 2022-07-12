@@ -166,13 +166,13 @@ function getParking(){
     .then(data => showParking(data.slice(1, data.length-1)))
 }
 var markers_parking = L.markerClusterGroup();
-
 // 2. 點標出來、導向 renderhistogram
 function showParking(object){
     if (mymap.hasLayer(markers_parking)){
         mymap.removeLayer(markers_parking);
     }
     else{
+        markers_parking = L.markerClusterGroup();
         for (let i=0; i<object.length; i+=6){
             // var popup = "<dd id='lotid'>" + object[i] + "</dd><dd>" + object[i+1] + "</dd><dd>" + object[i+2] + "</dd><dd>" + object[i+3] + "</dd>'<div id='histogram'></div>'";
             const popup ="<div id='histogram'></div>";
@@ -343,7 +343,15 @@ function showCctv(object){
         mymap.removeLayer(markers_cctv);
         return;
     }
-    
+    markers_cctv = L.markerClusterGroup({
+        iconCreateFunction: function(cluster) {
+            var markers = cluster.getAllChildMarkers();
+            // '<div class="circle">' + markers.length + '</div><div>'
+            var html = '<b>' + cluster.getChildCount() + '</b>';
+            // console.log(markers);
+            return L.divIcon({html: html});
+        }
+    });
     for (var i=0; i<object.length; i+=6){
         var popup = "<dd>" + object[i+5]+"</dd>" + "<dd><a href="+object[i+2]+" target='_blank'>即時畫面</a></dd>"
         const myIcon = L.icon({
