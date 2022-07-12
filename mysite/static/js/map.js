@@ -346,7 +346,10 @@ function showCctv(object){
     
     for (var i=0; i<object.length; i+=6){
         var popup = "<dd>" + object[i+5]+"</dd>" + "<dd><a href="+object[i+2]+" target='_blank'>即時畫面</a></dd>"
-        markers_cctv.addLayer(L.marker([object[i+4], object[i+3]]).bindPopup(popup)).addTo(mymap);
+        const myIcon = L.icon({
+            iconUrl: 'static/css/images/videocam-pin.svg'
+        });
+        markers_cctv.addLayer(L.marker([object[i+4], object[i+3]], { icon: myIcon }).bindPopup(popup)).addTo(mymap);
         mymap.addLayer(markers_cctv);
     }
 }
