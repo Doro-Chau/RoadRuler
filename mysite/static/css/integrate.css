@@ -19,9 +19,10 @@
 
 #day-select {
   width: 85px;
-  padding: 5px 8px;
+  padding: 4px 1px;
   border-radius: 8px;
   margin-right: 45px;
+  font-size: 6px;
 }
 
 .parking-info {
@@ -43,6 +44,12 @@
   padding-top: 10px;
   border-top: 2px dashed #3333;
   font-size: 1.25rem;
+}
+
+.ytitle {
+  color: red;
+  background-color: red;
+  font-size: 15px !important; 
 }
 
 * {

@@ -233,7 +233,8 @@ function histogram(data, lotid, parkginInfo){
         width: 350,
         height: 250,
         yaxis: {title: '數量'},
-        xaxis: {title: '時間'}
+        xaxis: {title: '時間'},
+        margin: {l:42, b:30}
     };
     Plotly.newPlot('histogram', data, layout);
     createSelect()
@@ -241,7 +242,7 @@ function histogram(data, lotid, parkginInfo){
     timerId = setInterval(()=>{
         let weekday = document.querySelector('#day-select option:checked').label;
         updateHistogramData(lotid, weekday)
-    }, 10000)
+    }, 100000)
 }
 
 async function updateHistogramData(lotid, weekday){
@@ -256,7 +257,8 @@ async function updateHistogramData(lotid, weekday){
         width: 350,
         height: 250,
         yaxis: {title: '數量'},
-        xaxis: {title: '時間'}
+        xaxis: {title: '時間'},
+        margin: {l:42, b:30}
     };
     Plotly.newPlot('histogram', trace, layout)
 }

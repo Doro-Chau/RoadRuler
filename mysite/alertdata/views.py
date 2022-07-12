@@ -29,12 +29,10 @@ def processmaplot(weekday, mondata):
     
     if (weekday != '平日') and (weekday != '假日'):
         df_mondata = df_mondata[df_mondata['weekday']==weekday]
-    
     elif weekday == '假日':
         df_mondata = df_mondata[(df_mondata['weekday']=='Sat')|(df_mondata['weekday']=='Sun')]
         df_mondata['weekday'] = '假日'
         df_mondata = df_mondata.groupby(['hr', 'weekday']).agg({'totalcar': 'mean', 'availablecar': 'mean'}).reset_index()
-        print(df_mondata)
     elif weekday == '平日':
         df_mondata = df_mondata[(df_mondata['weekday']!='Sat')&(df_mondata['weekday']!='Sun')]
         df_mondata['weekday'] = '平日'
