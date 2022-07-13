@@ -16,17 +16,12 @@ import datetime
 def map(request):
     return render(request, 'map2.html')
 
-def getWeekday():
-    weekday = datetime.datetime.today().weekday()
-    return list(calendar.day_abbr)[weekday]
-
 def processmaplot(weekday, mondata):
     df_mondata = pd.DataFrame(mondata)
     df_mondata = df_mondata.drop(columns=['_id']).drop_duplicates(subset=['update_time'])
     df_mondata[['weekday', 'month', 'date', 'time', 'CST', 'year']] = df_mondata['update_time'].str.split(' ', expand=True)
     df_mondata[['hr', 'min', 'sec']] = df_mondata['time'].str.split(':', expand=True)
     df_mondata = df_mondata.groupby(['hr', 'weekday']).agg({'totalcar': 'mean', 'availablecar': 'mean'}).reset_index()
-    
     if (weekday != '平日') and (weekday != '假日'):
         df_mondata = df_mondata[df_mondata['weekday']==weekday]
     elif weekday == '假日':
@@ -40,14 +35,11 @@ def processmaplot(weekday, mondata):
     dict_lot = {}
     for index, x in df_mondata.iterrows():
         left_lot_amount = [x['hr']] * int(x['availablecar'])
-        left_lot_percent = [x['hr']] * int(100 * int(x['availablecar']) / int(x['totalcar']))
+        left_lot_amount = [int(x) for x in left_lot_amount]
         if x['weekday'] in dict_lot:
-            dict_lot[x['weekday']][0].extend(left_lot_amount)
-            dict_lot[x['weekday']][1].extend(left_lot_percent)
+            dict_lot[x['weekday']].extend(left_lot_amount)
         else:
-            dict_lot[x['weekday']] = [-1, -1]
-            dict_lot[x['weekday']][0] = left_lot_amount
-            dict_lot[x['weekday']][1] = left_lot_percent
+            dict_lot[x['weekday']] = left_lot_amount
     return dict_lot
 def maplot(request):
     # db.lot_history.delete_many({'update_time':{'$exists':0}})
@@ -59,13 +51,12 @@ def maplot(request):
     else:
         weekday = json.loads(request.body)['weekday']
     print('lotid', lotid, 'weekday', weekday)
-    # weekday = getWeekday()
     
     db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
     mondata = list(db.lot_history.find({'id':str(lotid)}))
     if len(mondata) == 0:
         print('case1', mondata)
-        return JsonResponse({'lot': {'weekday': [[],[]]}}, status = 200)
+        return JsonResponse({'lot': {'weekday': []}}, status = 200)
     dict_lot = processmaplot(weekday, mondata)
     return JsonResponse({'lot': dict_lot}, status=200)
 
@@ -125,6 +116,8 @@ def renderParking(request):
     df_parking = df_parking[['id', 'name', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon']]
     df_parking[df_parking['availablecar']!='無提供資料'] = df_parking[df_parking['availablecar']!='無提供資料'].astype({"availablecar": float})
     df_parking[df_parking['availablecar']!='無提供資料'] = df_parking[df_parking['availablecar']!='無提供資料'].astype({"availablecar": int})
+    df_parking[df_parking['availablecar']!='無提供資料'] = df_parking[df_parking['availablecar']!='無提供資料'].astype({"availablecar": str})
+    df_parking.loc[df_parking['availablecar'].str.contains('-', na=False), 'availablecar'] = '無提供資料'
     # df_parking = df_parking.drop(columns=['update_time', 'id', 'fareinfo', 'payex', 'address'])
     parking = df_parking.values.tolist()
     return HttpResponse(parking)

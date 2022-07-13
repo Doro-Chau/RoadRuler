@@ -196,65 +196,72 @@ function deleteid(){
 }
 // 3. send lotid and weekday to gethistogramdata and plot first graph
 async function renderHistogram(e, parkingInfo){
-    console.log(parkingInfo)
     const leafletPopUpWrapper = document.querySelector(".leaflet-popup-content-wrapper")
     leafletPopUpWrapper.id = "leafletPopUpWrapperReplaceStyle"
     const lotid = parkingInfo[0]
     const now = new Date();
     const today = now.getDay();
-    console.log(today, days)
     const weekday = days[today]['text']
-    console.log(weekday)
     const data = await getHistogramData(lotid, weekday)
     const {lot} = data
     if (lot){
         Object.keys(lot).forEach(function(key) {
-            console.log(lot[key][0])
-            histogram(lot[key][0], lotid, parkingInfo);
+            histogram(lot[key], lotid, parkingInfo);
         });
     }
 }
 
 async function getHistogramData(lotid, weekday){
-    console.log(lotid);
     const res = await fetch("/maplot", {
         method:"POST",
         headers:{'Content-type':'application/json'},
         body:JSON.stringify({'lotid': lotid, 'weekday': weekday})
     })
     const data = await res.json()
+    console.log(data)
     return data
 }
 
-function histogram(data, lotid, parkginInfo){
-    var trace = {
-        x: data,
-        type: 'histogram',
-    };
-    var data = [trace];
-    var layout = {
-        width: 350,
-        height: 250,
-        yaxis: {title: '數量'},
-        xaxis: {title: '時間'},
-        margin: {l:42, b:30}
-    };
-    Plotly.newPlot('histogram', data, layout);
-    createSelect()
-    createParkingInfoElement(parkginInfo)
-    timerId = setInterval(()=>{
-        let weekday = document.querySelector('#day-select option:checked').label;
-        updateHistogramData(lotid, weekday)
-    }, 100000)
+function histogram(x, lotid, parkingInfo){
+    console.log(x)
+    if (x.length>0){
+        var trace = {
+            x: x,
+            type: 'histogram',
+            nbinsx: 24
+        };
+        var data = [trace];
+        var layout = {
+            width: 350,
+            height: 250,
+            yaxis: {title: '數量'},
+            xaxis: {title: '時間'},
+            margin: {l:42, b:30}
+        };
+        Plotly.newPlot('histogram', data, layout);
+        createSelect();
+        createParkingInfoElement(parkingInfo)
+        timerId = setInterval(()=>{
+            let weekday = document.querySelector('#day-select option:checked').label;
+            updateHistogramData(lotid, weekday)
+        }, 10000)
+    } 
+    else {
+        document.getElementById("histogram").style.width = "200px";
+        document.getElementById("histogram").style.height = "150px";
+        createParkingNoInfo(parkingInfo)
+    }
 }
 
 async function updateHistogramData(lotid, weekday){
     const data = await getHistogramData(lotid, weekday);
     const {lot} = data;
     if (!lot) return
+    console.log(lot[Object.keys(lot)[0]])
     const trace = [{
-        x: lot[Object.keys(lot)[0]][0],
-        type: 'histogram'
+        x: lot[Object.keys(lot)[0]],
+        type: 'histogram',
+        nbinsx: 24
         }]
     var layout = {
         width: 350,
@@ -264,6 +271,21 @@ async function updateHistogramData(lotid, weekday){
         margin: {l:42, b:30}
     };
     Plotly.newPlot('histogram', trace, layout)
+}
+
+function createParkingNoInfo(parkingInfo){
+    const parkingName = parkingInfo[1]
+    const totalParkingNumber = parkingInfo[2]
+    const leftParkingNumber = parkingInfo[3]
+    const container = document.createElement("div")
+    container.classList.add("parking-no-info")
+    container.innerHTML = `
+        <div class="parking-no-name">${parkingName}</div>
+        <div class="total-no-parking">總停車位數：${totalParkingNumber}</div>
+        <div class="left-no-parking">剩餘車位：無提供資料</div>
+    `
+    const histogram = document.querySelector("#histogram")
+    histogram.appendChild(container)
 }
 
 function createParkingInfoElement(parkingInfo){
@@ -278,6 +300,7 @@ function createParkingInfoElement(parkingInfo){
         <div class="left-parking">剩餘車位：${leftParkingNumber}</div>
         <div class="time-zone-parkgin">各時段剩餘車位數</div>
     `
+
     const histogram = document.querySelector("#histogram")
     histogram.appendChild(container)
 }
