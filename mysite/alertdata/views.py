@@ -1,3 +1,4 @@
+from requests import request
 from .models import RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot, Construction, ConstructionCoor, TrafficLinkBroken
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -15,6 +16,9 @@ import datetime
 
 def map(request):
     return render(request, 'map2.html')
+
+def monitor(request):
+    return render(request, 'monitor.html')
 
 def processmaplot(weekday, mondata):
     df_mondata = pd.DataFrame(mondata)
