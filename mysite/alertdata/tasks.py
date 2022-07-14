@@ -11,6 +11,20 @@ from django.http import HttpResponse
 #from models import Construction, ConstructionCoor, Parkinglot, TrafficLink, TrafficLinkBroken, TrafficLivevd, TrafficCctv
 import pandas as pd
 from pymongo import MongoClient
+from datetime import date
+
+def storeDaily():
+    cctv_amount = len(list(models.TrafficCctv.objects.all().values()))
+    db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
+    mondata_lot = list(db.lot_history.find({}))
+    mondata_vd = list(db.vd_history.find({}))
+    df_lot = pd.DataFrame(mondata_lot)[['id', 'update_time']].drop_duplicates()
+    df_vd = pd.DataFrame(mondata_vd)['LinkID', 'update_time'].drop_duplicates()
+    lot_amount = len(df_lot)
+    vd_amount = len(df_vd)
+    today = date.today()
+    models.MonitorDaily.objects.bulk_create(models.MonitorDaily(today, cctv_amount, lot_amount, vd_amount))
+    return 'success'
 
 def getConstruction():
     models.ConstructionCoor.objects.all().delete()

@@ -31,6 +31,15 @@ def monitor(request):
     print(']]]]]]]]', request.method)
     return render(request, 'signin.html')
 
+def monitorAlert(request):
+    df_alert = pd.DataFrame(list(RealtimeAlert.objects.all().values()))
+    df_alert = df_alert[['sent', 'response']]
+    df_alert.fillna('1', inplace=True)
+    alert = df_alert.T.values.tolist()
+    alert[1] = [2 if 'sender' in x else 1 for x in alert[1]]
+    print(alert)
+    return HttpResponse(alert)
+
 def processmaplot(weekday, mondata):
     df_mondata = pd.DataFrame(mondata)
     df_mondata = df_mondata.drop(columns=['_id']).drop_duplicates(subset=['update_time'])

@@ -3,13 +3,20 @@
 .chart--container {
   height: 100%;
   width: 100%;
-  min-height: 530px;
+  min-height: 330px;
 }
 
 .zc-ref {
   display: none;
 }
 .column {
+    display: flex;
+}
+#barChart{
+    display: flex;
+    flex-basis: 150%;
+}
+#pieChart{
     display: flex;
 }
 #mixChart{

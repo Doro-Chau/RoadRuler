@@ -185,6 +185,28 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
+class MonitorDaily(models.Model):
+    date = models.DateField(primary_key=True)
+    cctv = models.IntegerField(db_column='CCTV', blank=True, null=True)  # Field name made lowercase.
+    mongo_lot = models.IntegerField(blank=True, null=True)
+    mongo_vd = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'monitor_daily'
+
+
+class MonitorRealtime(models.Model):
+    time = models.CharField(primary_key=True, max_length=80)
+    average = models.IntegerField(blank=True, null=True)
+    number = models.IntegerField(blank=True, null=True)
+    realtime_amount = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'monitor_realtime'
+
+
 class Parkinglot(models.Model):
     update_time = models.CharField(max_length=45, blank=True, null=True)
     id = models.CharField(primary_key=True, max_length=30)

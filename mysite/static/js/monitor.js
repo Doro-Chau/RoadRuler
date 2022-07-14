@@ -1,3 +1,111 @@
+function getAlert(){
+    return fetch('/monitorAlert')
+    .then(res => res.text())
+    .then(res2 => res2.split(/[,'\s\[\]]+/))
+    .then(data => showAlert(data.slice(1, data.length-1)))
+}
+function showAlert(object){
+    const divide = object.length/2;
+    // console.log(divide, object);
+    const date = object.slice(0, divide).slice(-10)
+    const status = object.slice(divide).slice(-10)
+    for (let i=0; i<status.length; i++){
+        status[i] = parseInt(status[i])
+    }
+    let barConfig = {
+        type: 'bar',
+        backgroundColor: '#454754',
+        borderBottom: '8px solid #565867',
+        width: '100%',
+        title: {
+            text: '民生公開示警平台資料接收狀況',
+            fontColor: '#ffffff',
+        },
+        plot: {
+            animation: {
+            delay: 0,
+            effect: 'ANIMATION_EXPAND_BOTTOM',
+            method: 'ANIMATION_LINEAR',
+            sequence: 'ANIMATION_NO_SEQUENCE',
+            speed: '1000',
+            },
+            barSpace: '10px',
+            rules: 
+            [
+                {
+                    rule: '%v > 1',
+                    backgroundColor: '#57dde8'
+                }
+            ],
+        },
+        plotarea: {
+            margin: '45px 30px 40px 65px',
+        },
+        scaleX: {
+            values: date,
+            guide: {
+                visible: false,
+                },
+            item: {
+            fontColor: '#c0c0c0',
+            fontFamily: 'Arial',
+            fontSize: '10px',
+            },
+            lineColor: '#55717c',
+            offsetY: '4px',
+            tick: {
+            lineColor: '#55717c',
+            lineWidth: '1px',
+            size: '5px',
+            visible: false,
+            },
+        },
+        scaleY: {
+            values: '0:3:1',
+            guide: {
+                alpha: 1,
+                lineColor: '#5e606c',
+                lineStyle: 'solid',
+                },
+            item: {
+            paddingLeft: '2px',
+            fontColor: '#c0c0c0',
+            fontFamily: 'Arial',
+            fontSize: '10px',
+            },
+            label: 
+            {
+                text: '正常/異常',
+                fontColor: '#ffffff',
+                fontFamily: 'Arial',
+                fontSize: '11px',
+                fontWeight: 'normal',
+                offsetX: '-5px',
+            },
+            lineColor: 'none',
+            multiplier: true,
+            tick: {
+            visible: false,
+            },
+        },
+        series: [
+            {
+            values: status,
+            tooltip: {
+                padding: '5px 10px',
+                backgroundColor: '#a03f9c',
+                borderRadius: '6px',
+                fontColor: '#ffffff',
+                shadow: false,
+            },
+            backgroundColor: '#b857b4',
+            },
+        ],
+    }
+    barChart(barConfig)
+}
+getAlert();
+
 let pieConfig = {
     type: 'pie',
     backgroundColor: '#454754',
@@ -104,132 +212,6 @@ let pieConfig = {
     ],
 }
 
-let barConfig = {
-    type: 'bar',
-    backgroundColor: '#454754',
-    borderBottom: '8px solid #565867',
-    width: '100%',
-    title: {
-        text: '民生公開示警平台資料接收狀況',
-        fontColor: '#ffffff',
-    },
-    plot: {
-        animation: {
-        delay: 0,
-        effect: 'ANIMATION_EXPAND_BOTTOM',
-        method: 'ANIMATION_LINEAR',
-        sequence: 'ANIMATION_NO_SEQUENCE',
-        speed: '1000',
-        },
-        barSpace: '10px',
-    },
-    plotarea: {
-        margin: '45px 30px 40px 65px',
-    },
-    scaleX: {
-        values: [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-        ],
-        guide: {
-        visible: false,
-        },
-        item: {
-        fontColor: '#c0c0c0',
-        fontFamily: 'Arial',
-        fontSize: '10px',
-        },
-        lineColor: '#55717c',
-        offsetY: '4px',
-        tick: {
-        lineColor: '#55717c',
-        lineWidth: '1px',
-        size: '5px',
-        visible: false,
-        },
-    },
-    scaleY: {
-        values: '0:50000:10000',
-        guide: {
-        alpha: 1,
-        lineColor: '#5e606c',
-        lineStyle: 'solid',
-        },
-        item: {
-        paddingLeft: '2px',
-        fontColor: '#c0c0c0',
-        fontFamily: 'Arial',
-        fontSize: '10px',
-        },
-        label: {
-        text: 'Sales by Employee',
-        fontColor: '#ffffff',
-        fontFamily: 'Arial',
-        fontSize: '11px',
-        fontWeight: 'normal',
-        offsetX: '-5px',
-        },
-        lineColor: 'none',
-        multiplier: true,
-        tick: {
-        visible: false,
-        },
-    },
-    series: [
-        {
-        values: [
-            31000, 39500, 24300, 36000, 38000, 45500, 28500, 38000, 21000,
-            17000, 24000, 17500,
-        ],
-        tooltip: {
-            padding: '5px 10px',
-            backgroundColor: '#54ced4',
-            borderRadius: '6px',
-            fontColor: '#454754',
-            shadow: false,
-        },
-        backgroundColor: '#57dde8',
-        },
-        {
-        values: [
-            11500, 36750, 7000, 44500, 11500, 28450, 42900, 26750, 13050, 32600,
-            12500, 14300,
-        ],
-        tooltip: {
-            padding: '5px 10px',
-            backgroundColor: '#796bdd',
-            borderRadius: '6px',
-            fontColor: '#ffffff',
-            shadow: false,
-        },
-        backgroundColor: '#978af6',
-        },
-        {
-        values: [
-            21500, 29550, 14500, 16500, 28450, 35600, 21550, 18750, 11600, 7500,
-            14750, 16000,
-        ],
-        tooltip: {
-            padding: '5px 10px',
-            backgroundColor: '#a03f9c',
-            borderRadius: '6px',
-            fontColor: '#ffffff',
-            shadow: false,
-        },
-        backgroundColor: '#b857b4',
-        },
-    ],
-}
 
 let mixConfig = {
     backgroundColor: '#454754',
@@ -399,9 +381,11 @@ zingchart.render({
     width: '100%',
 });
 
-zingchart.render({
-    id: 'barChart',
-    data: barConfig,
-    height: '100%',
-    width: '100%',
-});
+function barChart(object){
+    zingchart.render({
+        id: 'barChart',
+        data: object,
+        height: '100%',
+        width: '100%',
+    });
+}
