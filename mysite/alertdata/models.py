@@ -212,6 +212,7 @@ class RealtimeAlert(models.Model):
     status = models.CharField(max_length=45, blank=True, null=True)
     msgtype = models.CharField(db_column='msgType', max_length=45, blank=True, null=True)  # Field name made lowercase.
     scope = models.CharField(max_length=45, blank=True, null=True)
+    response = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False

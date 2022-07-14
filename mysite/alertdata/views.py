@@ -19,6 +19,17 @@ def map(request):
 
 def monitor(request):
     return render(request, 'monitor.html')
+    if request.method == 'POST':
+        uname = request.POST.get('uname')
+        psw = request.POST.get('psw')
+        if uname == os.getenv('MONITOR_NAME') and psw == os.getenv('MONITOR_PSW'):
+            print('[[[[[[[[[[[[[[[[[[', request.method)
+            return render(request, 'monitor.html')
+        else:
+            context = {'state': 'incorrect password'}
+            return render(request, 'signin.html', context)
+    print(']]]]]]]]', request.method)
+    return render(request, 'signin.html')
 
 def processmaplot(weekday, mondata):
     df_mondata = pd.DataFrame(mondata)
@@ -150,6 +161,7 @@ def getData(request):
         dict_alert = {k.lower(): v for k, v in dict_alert.items()}
         column_name = [x.name for x in RealtimeAlert._meta.get_fields()][2:]
         dict_alert = {x: dict_alert[x] for x in column_name}
+        dict_alert['response'] = data
         RealtimeAlert.objects.create(**dict_alert)
         
         for child in root:

@@ -1,0 +1,28 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Road Ruler</title>
+    <link rel="stylesheet" href="{% static 'css/integrate.css' %}" />
+</head>
+<body>
+    <form method="post">
+        <div class="imgcontainer">
+          <img src="static/css/images/Road Ruler Logo.svg" alt="Avatar" class="avatar">
+        </div>
+      
+        <div class="container">
+          <label for="uname"><b>Username</b></label>
+          <input type="text" placeholder="Enter Username" name="uname" required>
+      
+          <label for="psw"><b>Password</b></label>
+          <input type="password" placeholder="Enter Password" name="psw" required>
+          <div id='login-state'>{{ state }} </div>
+          <button type="submit">Login</button>
+        </div>
+        
+    </form>
+    <script src="{% static 'js/map.js' %}"></script>
+</body>
+</html>
