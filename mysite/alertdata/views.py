@@ -159,9 +159,9 @@ def getData(request):
             if len(child) == 0:
                 dict_alert[child.tag[38:]] = child.text
         dict_alert = {k.lower(): v for k, v in dict_alert.items()}
+        dict_alert['response'] = data
         column_name = [x.name for x in RealtimeAlert._meta.get_fields()][2:]
         dict_alert = {x: dict_alert[x] for x in column_name}
-        dict_alert['response'] = data
         RealtimeAlert.objects.create(**dict_alert)
         
         for child in root:
