@@ -12,18 +12,16 @@ from django.http import HttpResponse
 import pandas as pd
 from pymongo import MongoClient
 from datetime import date
+import bson
 
 def storeDaily():
     cctv_amount = len(list(models.TrafficCctv.objects.all().values()))
     db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
-    mondata_lot = list(db.lot_history.find({}))
-    mondata_vd = list(db.vd_history.find({}))
-    df_lot = pd.DataFrame(mondata_lot)[['id', 'update_time']].drop_duplicates()
-    df_vd = pd.DataFrame(mondata_vd)['LinkID', 'update_time'].drop_duplicates()
-    lot_amount = len(df_lot)
-    vd_amount = len(df_vd)
+    lot_amount = db.lot_history.count_documents({})
+    vd_amount = db.vd_history.count_documents({})
     today = date.today()
-    models.MonitorDaily.objects.bulk_create(models.MonitorDaily(today, cctv_amount, lot_amount, vd_amount))
+    b = models.MonitorDaily(date = today, cctv = cctv_amount, mongo_lot = lot_amount, mongo_vd = vd_amount)
+    b.save()
     return 'success'
 
 def getConstruction():
@@ -95,6 +93,7 @@ def getParking():
     collection.insert_many(documents)
 
     parkinglot = models.Parkinglot.objects.all()
+    print(df_merge)
     for index, x in df_merge.iterrows():
         if x['id'] not in exist_id:
             bulk_create.append(models.Parkinglot(x['update_time'], x['id'], x['area'], x['name'], x['summary'], x['address'], x['payex'], x['serviceTime'], x['totalcar'], x['availablecar'], x['entrancelat'], x['entrancelon']))
@@ -218,7 +217,7 @@ def getCCTV():
             bulk_create.append(models.TrafficCctv(update_time, dict_CCTV['CCTVID'], dict_CCTV['VideoStreamURL'], dict_CCTV['PositionLon'], dict_CCTV['PositionLat'], dict_CCTV['RoadName']))
         else:
             for tc in trafficcctv:
-                if tc.pk == dict_CCTV:
+                if tc.pk == dict_CCTV['CCTVID']:
                     tc.update_time = update_time
                     tc.videostreamurl = dict_CCTV['VideoStreamURL']
                     tc.positionlat = dict_CCTV['PositionLat']
