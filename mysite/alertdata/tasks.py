@@ -11,18 +11,45 @@ from django.http import HttpResponse
 #from models import Construction, ConstructionCoor, Parkinglot, TrafficLink, TrafficLinkBroken, TrafficLivevd, TrafficCctv
 import pandas as pd
 from pymongo import MongoClient
-from datetime import date
 import bson
+import datetime
+
+def get_db_handle(db_name, host, port, username, password):
+    client = MongoClient(host = host, port = int(port), username = username, password = password)
+    db = client[db_name]
+    return db, client
 
 def storeDaily():
     cctv_amount = len(list(models.TrafficCctv.objects.all().values()))
     db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
     lot_amount = db.lot_history.count_documents({})
     vd_amount = db.vd_history.count_documents({})
-    today = date.today()
+    today = datetime.date.today()
     b = models.MonitorDaily(date = today, cctv = cctv_amount, mongo_lot = lot_amount, mongo_vd = vd_amount)
     b.save()
     return 'success'
+
+def storeRealtime():
+    bulk_update = []
+    park_amount = len(list(models.Parkinglot.objects.all().values()))
+    vd_amount = len(list(models.TrafficLivevd.objects.all().values()))
+    
+    monitorrealtime = models.MonitorRealtime.objects.all()
+    time = datetime.datetime.now()+datetime.timedelta(hours=8)
+    for mrt in monitorrealtime:
+        mrt.time = time
+        if mrt.pk == 'parkinglot':
+            mrt.average = (mrt.average * mrt.number + park_amount)/(mrt.number + 1)
+            mrt.number = mrt.number + 1
+            mrt.realtime_amount = park_amount
+        elif mrt.pk == 'vd':
+            mrt.average = (mrt.average * mrt.number + vd_amount)/(mrt.number + 1)
+            mrt.number = mrt.number + 1
+            mrt.realtime_amount = vd_amount
+        bulk_update.append(mrt)
+    models.MonitorRealtime.objects.bulk_update(bulk_update, ['time', 'average', 'number', 'realtime_amount'])  
+    return 'success'
+
 
 def getConstruction():
     models.ConstructionCoor.objects.all().delete()
@@ -115,12 +142,6 @@ def getParking():
     models.Parkinglot.objects.bulk_create(bulk_create)
     models.Parkinglot.objects.bulk_update(bulk_update, ['update_time', 'area', 'name', 'summary', 'address', 'payex', 'servicetime', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon'])
     return response
-
-def get_db_handle(db_name, host, port, username, password):
-    client = MongoClient(host = host, port = int(port), username = username, password = password)
-    db = client[db_name]
-    return db, client
-
 
 def getLiveVD():
     db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))

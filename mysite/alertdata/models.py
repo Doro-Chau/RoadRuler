@@ -197,10 +197,11 @@ class MonitorDaily(models.Model):
 
 
 class MonitorRealtime(models.Model):
-    time = models.CharField(primary_key=True, max_length=80)
+    time = models.CharField(max_length=80, blank=True, null=True)
     average = models.IntegerField(blank=True, null=True)
     number = models.IntegerField(blank=True, null=True)
     realtime_amount = models.IntegerField(blank=True, null=True)
+    type = models.CharField(primary_key=True, max_length=45)
 
     class Meta:
         managed = False

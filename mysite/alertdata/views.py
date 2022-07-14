@@ -1,5 +1,5 @@
 from requests import request
-from .models import RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot, Construction, ConstructionCoor, TrafficLinkBroken
+from .models import RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot, Construction, ConstructionCoor, TrafficLinkBroken, MonitorRealtime
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import os, io, json
@@ -37,7 +37,6 @@ def monitorAlert(request):
     df_alert.fillna('1', inplace=True)
     alert = df_alert.T.values.tolist()
     alert[1] = [2 if 'sender' in x else 1 for x in alert[1]]
-    print(alert)
     return HttpResponse(alert)
 
 def processmaplot(weekday, mondata):

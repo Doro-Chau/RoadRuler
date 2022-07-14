@@ -221,16 +221,9 @@ let mixConfig = {
         backgroundColor: '#454754',
         width: '70%',
         title: {
-          text: '日資料',
-          paddingLeft: '20px',
+          text: 'MongoDB 每日增加資料',
           backgroundColor: 'none',
           fontColor: '#ffffff',
-          fontFamily: 'Arial',
-          fontSize: '18px',
-          fontWeight: 'normal',
-          height: '40px',
-          textAlign: 'left',
-          y: '10px',
         },
         plotarea: {
           margin: '75px 75px 5px 67px',
@@ -312,7 +305,7 @@ let mixConfig = {
         },
         series: [
           {
-            type: 'bar',
+            type: 'line',
             values: [
               48000, 31000, 62000, 40500, 44550, 29500, 46000, 70050, 39500,
               45800, 29000, 15000,
