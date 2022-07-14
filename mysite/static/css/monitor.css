@@ -1,0 +1,17 @@
+.zc-body { background:#454754; }
+
+.chart--container {
+  height: 100%;
+  width: 100%;
+  min-height: 530px;
+}
+
+.zc-ref {
+  display: none;
+}
+.column {
+    display: flex;
+}
+#mixChart{
+    display: flex;
+}
