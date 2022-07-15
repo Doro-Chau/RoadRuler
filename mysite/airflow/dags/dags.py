@@ -3,7 +3,7 @@ from airflow.operators.python import PythonOperator
 from datetime import timedelta, datetime 
 import sys
 sys.path.append('/home/ec2-user/Project_disaster_map/mysite/alertdata/')
-from tasks import getParking, get_db_handle, getLiveVD
+from tasks import getParking, get_db_handle, getLiveVD, storeRealtime
 default_args = {
         'owner': 'dorothy',
         'start_date': datetime(2022, 7, 4),
@@ -23,3 +23,8 @@ with DAG('my_dag', start_date=datetime(2022, 7, 4), schedule_interval='*/2 * * *
             task_id='get_road',
             python_callable=getLiveVD
             )
+    store_realtime = PythonOperator(
+            task_id='store_realtime',
+            python_callable=storeRealtime
+            )
+    [get_parkinglot, get_road] >> store_realtime
