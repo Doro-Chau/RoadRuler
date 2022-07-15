@@ -1,5 +1,5 @@
 from requests import request
-from .models import RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot, Construction, ConstructionCoor, TrafficLinkBroken, MonitorRealtime
+from .models import RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot, Construction, ConstructionCoor, TrafficLinkBroken, MonitorRealtime, MonitorDaily
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import os, io, json
@@ -38,6 +38,21 @@ def monitorAlert(request):
     alert = df_alert.T.values.tolist()
     alert[1] = [2 if 'sender' in x else 1 for x in alert[1]]
     return HttpResponse(alert)
+
+def monitorRealtime(request):
+    df_realtime = pd.DataFrame(list(MonitorRealtime.objects.all().values()))
+    realtime = df_realtime.values.tolist()
+    return HttpResponse(realtime)
+
+def monitorDaily(request):
+    df_daily = pd.DataFrame(list(MonitorDaily.objects.all().values()))
+    df_return = pd.DataFrame(columns=['date', 'cctv', 'park', 'vd'])
+    for index, x in df_daily.iterrows():
+        if index != 0:
+            df_return = df_return.append({'date': df_daily.loc[index]['date'], 'cctv': df_daily.loc[index]['cctv'], 'park': df_daily.loc[index]['mongo_lot']-df_daily.loc[index-1]['mongo_lot'], 'vd': df_daily.loc[index]['mongo_vd']-df_daily.loc[index-1]['mongo_vd']}, ignore_index=True)
+    list_return = df_return.T.values.tolist()
+    print(list_return)
+    return HttpResponse(list_return)
 
 def processmaplot(weekday, mondata):
     df_mondata = pd.DataFrame(mondata)

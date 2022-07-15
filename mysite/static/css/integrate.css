@@ -273,7 +273,7 @@ path.leaflet-interactive {
   font-size: 20px;
 }
 .alert-type {
-  color: #F0A202;
+  color: #1a6d6ee4;
   text-align: left;
   font-size: 20px;
   padding: 1px 0px 0px 6px;
@@ -288,7 +288,7 @@ path.leaflet-interactive {
 
 .innerdiv {
   display: flex;
-  background-color: #F0A202;
+  background-color: #1a6d6ee4;
   align-items: center;
   padding: 5px 0px;
 }
@@ -370,11 +370,11 @@ html {
   cursor: pointer;
 }
 .map-layer-inactive {
-  background-color: #F0A202;
+  background-color: #229597b6;
   transition: background-color 0.1s;
 }
 .map-layer-active {
-  background-color: #a06c03;
+  background-color: #135051e4;
   transition: background-color 0.1s;
 }
 

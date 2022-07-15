@@ -12,5 +12,7 @@ urlpatterns = [
     path('renderConstruction', views.renderConstruction),
     path('maplot', views.maplot),
     path('monitor', views.monitor),
-    path('monitorAlert', views.monitorAlert)
+    path('monitorAlert', views.monitorAlert),
+    path('monitorRealtime', views.monitorRealtime),
+    path('monitorDaily', views.monitorDaily)
 ]

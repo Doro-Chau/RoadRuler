@@ -3,7 +3,7 @@
 .chart--container {
   height: 100%;
   width: 100%;
-  min-height: 330px;
+  min-height: 278px;
 }
 
 .zc-ref {
@@ -16,9 +16,9 @@
     display: flex;
     flex-basis: 150%;
 }
-#pieChart{
+#realtimebarChart{
     display: flex;
 }
-#mixChart{
+#parkChart{
     display: flex;
 }
