@@ -120,7 +120,6 @@ function getRealtime(){
     // .then(data => showRealtime(data.slice(1, data.length-1)))
 }
 function showRealtime(object){
-    console.log(object);
     let realtimebarConfig = {
         type: 'bar',
         backgroundColor: '#454754',
@@ -258,7 +257,7 @@ function renderLineConfig(xvalue, yvalue, yscale, title){
               margin: '75px 75px 17px 67px',
             },
             scaleX: {
-              values: [xvalue],
+              values: xvalue,
               flat: false,
               guide: {
                 visible: false,
@@ -312,7 +311,7 @@ function renderLineConfig(xvalue, yvalue, yscale, title){
             series: [
             {
             type: 'line',
-            values: [yvalue],
+            values: yvalue,
             tooltip: {
                 padding: '5px 10px',
                 backgroundColor: '#54ced4',
@@ -346,27 +345,41 @@ function renderLineConfig(xvalue, yvalue, yscale, title){
 function getDaily(){
     return fetch('/monitorDaily')
     .then(res => res.text())
-    .then(res2 => res2.split(/['\[\]]+/))
+    .then(res2 => res2.split(/[',\s\[\]]+/))
     .then(res3 => toInt(res3))
     .then(data => showDaily(data.slice(1, data.length-1)))
+    
 }
 function showDaily(object){
-    object[0] = object[0].slice(14, -1)
+    const date = [];
+    const cctv = [];
+    const lot = [];
+    const vd = [];
+    for (let i=0; i<object.length; i+=4){
+        date.push(object[i]);
+        cctv.push(object[i+1]);
+        lot.push(object[i+2]);
+        vd.push(object[i+3]);
+    }
+    console.log(date)
+    console.log(cctv)
+    console.log(lot)
+    console.log(vd)
     zingchart.render({
         id: 'parkChart',
-        data: renderLineConfig(object[0], object[2], '0:300000:100000', '即時車位資訊日增加量'),
+        data: renderLineConfig(date, lot, '0:300000:100000', '即時車位資訊日增加量'),
         height: '100%',
         width: '100%',
     });
     zingchart.render({
         id: 'vdChart',
-        data: renderLineConfig(object[0], object[3], '0:300000:100000', '路況資訊日增加量'),
+        data: renderLineConfig(date, vd, '0:300000:100000', '路況資訊日增加量'),
         height: '100%',
         width: '100%',
     });
     zingchart.render({
         id: 'cctvChart',
-        data: renderLineConfig(object[0], object[1], '0:500:100', '監控錄像數量'),
+        data: renderLineConfig(date, cctv, '0:500:100', '監控錄像數量'),
         height: '100%',
         width: '100%',
     });

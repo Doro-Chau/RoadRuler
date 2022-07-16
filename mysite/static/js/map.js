@@ -124,26 +124,18 @@ function getConstruction(){
     .then(res2 => res2.split(/[,'\s\[\]]+/))
     .then(data => showConstruction(data.slice(1, data.length-1)))
 }
-var markers_construction = L.markerClusterGroup();
+var markers_construction = L.layerGroup();
 function showConstruction(object){
+    console.log(object);
     if (mymap.hasLayer(markers_construction)){
         mymap.removeLayer(markers_construction);
     }
     else{
-        let temp_road = 999;
-        for (let i=0; i<object.length; i+=5){
-            if (object[i+2] != temp_road){
-                if (i!=0){
-                    var popup = "<dd>" + object[i+1] + "</dd><dd> 路段編號" + object[i+2] + "</dd>";
-                    markers_construction.addLayer(L.polyline(line).bindPopup(popup)).addTo(mymap);
-                }
-                temp_road = object[i+2];
-                var line = [[object[i+3], object[i+4]]];
-            }
-            else{
-                line.push([object[i+3], object[i+4]]);
-            }
+        for (let i=0; i< object.length; i+=6){
+            let popup = "<dd>施工單位： " + object[i] + "</dd><dd>施工期間： " + object[i+1] + "-" + object[i+2] + "</dd><dd>每日施工時間： " + object[i+3] + "</dd>";
+            markers_construction.addLayer(L.circle([object[i+4], object[i+5]], {radius: 3.5}).bindPopup(popup)).addTo(mymap);
             mymap.addLayer(markers_construction);
+            console.log(markers_construction)
         }
     }
 }

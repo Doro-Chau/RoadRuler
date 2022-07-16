@@ -13,6 +13,8 @@ import pandas as pd
 from pymongo import MongoClient
 import calendar
 import datetime
+from django.conf import settings
+from django.shortcuts import redirect
 
 def map(request):
     return render(request, 'map2.html')
@@ -50,8 +52,8 @@ def monitorDaily(request):
     for index, x in df_daily.iterrows():
         if index != 0:
             df_return = df_return.append({'date': df_daily.loc[index]['date'], 'cctv': df_daily.loc[index]['cctv'], 'park': df_daily.loc[index]['mongo_lot']-df_daily.loc[index-1]['mongo_lot'], 'vd': df_daily.loc[index]['mongo_vd']-df_daily.loc[index-1]['mongo_vd']}, ignore_index=True)
-    list_return = df_return.T.values.tolist()
-    print(list_return)
+    df_return = df_return.astype({'date': str})
+    list_return = df_return.values.tolist()
     return HttpResponse(list_return)
 
 def processmaplot(weekday, mondata):
@@ -145,7 +147,8 @@ def renderConstruction(reuest):
     df_construction_coor = pd.DataFrame(list(ConstructionCoor.objects.all().values()))
     df_construction_coor.rename(columns={'facility_no_id':'facility_no'}, inplace=True)
     df_merge = df_construction.merge(df_construction_coor, how='inner', on='facility_no')
-    df_merge = df_merge[['facility_no', 'contractor', 'road', 'lat', 'lon']]
+    df_merge = df_merge[['contractor', 'construction_begin', 'construction_end', 'construction_timezone', 'lat', 'lon']]
+    print(df_merge)
     merge = df_merge.values.tolist()
     return HttpResponse(merge)
 
@@ -213,3 +216,9 @@ def getData(request):
         str = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> <Data><Status>{0}</Status></Data>"
         str = str.format("True")
         return HttpResponse(str)
+
+def error_404_view(request, exception):
+   
+    # we add the path to the the 404.html file
+    # here. The name of our HTML file is 404.html
+    return render(request, '404.html')
