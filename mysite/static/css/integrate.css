@@ -238,7 +238,6 @@ html {
 
 .sidebar {
   display:inline-block;
-  height: 100%; /* 100% Full-height */
   width: 0; /* 0 width - change this with JavaScript */
   right: 0;
   overflow-x: hidden; /* Disable horizontal scroll */
