@@ -14,7 +14,7 @@ input[type=text], input[type=password] {
 }
 
 /* Set a style for all buttons */
-button {
+.container button {
   background-color: #F0A202;
   color: white;
   padding: 14px 20px;
@@ -24,7 +24,7 @@ button {
 }
 
 /* Add a hover effect for buttons */
-button:hover {
+.container button:hover {
   opacity: 0.8;
 }
 
@@ -161,11 +161,13 @@ img {
   margin-right: 31px;
 }
 
-.leaflet-control-geocoder-expanded .leaflet-control-geocoder-form{
+.leaflet-control-geocoder-form input {
+  margin: 0;
+  padding: 0;
   padding-left: 8px;
-  padding-bottom: 3px;
-  box-shadow: 1.5px 3px rgb(93, 93, 93);
+  font-size: 1rem;
 }
+
 .leaflet-left .leaflet-control {
   margin-left: calc(100vw - 55px);
 }
@@ -179,39 +181,6 @@ img {
 path.leaflet-interactive {
   stroke-width: 4.5;
   stroke-opacity: 0.5;
-}
-
-.search-bar-container {
-  display: flex;
-  position: fixed;
-  top: 20px;
-  z-index: 999;
-  align-items: center;
-  justify-content: center;
-  width: 100vw;
-}
-
-.search-bar {
-  background-color: white;
-  font-size: 1rem;
-  width: 25vw;
-  padding: 0.3rem 0.8rem;
-  height: 1.8rem;
-  border-radius: 1.6rem;
-  color: black;
-  box-shadow: 1.5px 3px rgb(93, 93, 93);
-  border: none;
-}
-.search-bar-button {
-  border: none;
-  background-color: transparent;
-  position: absolute;
-  right: 37vw;
-  cursor: pointer;
-}
-.search-bar-icon {
-  height: 1.5rem;
-  filter: none;
 }
 
 .map-legend-container {
@@ -431,7 +400,6 @@ hr {
   background-image: url("images/parking-circle.svg");
 }
 
-
 .leaflet-div-icon {
   background-color: transparent;
   background-repeat: no-repeat;
@@ -460,15 +428,12 @@ hr {
   padding-top: 4px;
 }
 
-
-
 .leaflet-popup-tip {
   background: white;
   color: #333;
   box-shadow: 2px 3px rgb(93, 93, 93);
   text-align: center;
 }
-
 
 .leaflet-popup-tip {
   display: none;
@@ -478,7 +443,6 @@ hr {
   font-weight: bold;
   font-size: 1.5rem;
 }
-
 
 #parking .graph-example {
   width: 200px;
