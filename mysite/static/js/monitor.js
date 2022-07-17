@@ -14,7 +14,6 @@ function toInt(object){
 }
 function showAlert(object){
     const divide = object.length/2;
-    // console.log(divide, object);
     const date = object.slice(0, divide).slice(-10)
     const statusstr = object.slice(divide).slice(-10)
     const status = toInt(statusstr);
@@ -361,19 +360,15 @@ function showDaily(object){
         lot.push(object[i+2]);
         vd.push(object[i+3]);
     }
-    console.log(date)
-    console.log(cctv)
-    console.log(lot)
-    console.log(vd)
     zingchart.render({
         id: 'parkChart',
-        data: renderLineConfig(date, lot, '0:300000:100000', '即時車位資訊日增加量'),
+        data: renderLineConfig(date, lot, '0:500000:100000', '即時車位資訊日增加量'),
         height: '100%',
         width: '100%',
     });
     zingchart.render({
         id: 'vdChart',
-        data: renderLineConfig(date, vd, '0:300000:100000', '路況資訊日增加量'),
+        data: renderLineConfig(date, vd, '0:500000:100000', '路況資訊日增加量'),
         height: '100%',
         width: '100%',
     });
