@@ -133,7 +133,7 @@ function showConstruction(object){
     else{
         for (let i=0; i< object.length; i+=6){
             let popup = "<dd>施工單位： " + object[i] + "</dd><dd>施工期間： " + object[i+1] + "-" + object[i+2] + "</dd><dd>每日施工時間： " + object[i+3] + "</dd>";
-            markers_construction.addLayer(L.circle([object[i+4], object[i+5]], {radius: 3.5}).bindPopup(popup)).addTo(mymap);
+            markers_construction.addLayer(L.circle([object[i+4], object[i+5]], {radius: 4.5}).bindPopup(popup)).addTo(mymap);
             mymap.addLayer(markers_construction);
             console.log(markers_construction)
         }
