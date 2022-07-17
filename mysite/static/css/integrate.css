@@ -8,35 +8,24 @@ form {
 
 /* Full-width inputs */
 input[type=text], input[type=password] {
-  width: 100%;
   padding: 12px 20px;
   margin: 8px 0;
   display: inline-block;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
 }
 
 /* Set a style for all buttons */
 button {
-  background-color: #04AA6D;
+  background-color: #F0A202;
   color: white;
   padding: 14px 20px;
   margin: 8px 0;
   border: none;
   cursor: pointer;
-  width: 100%;
 }
 
 /* Add a hover effect for buttons */
 button:hover {
   opacity: 0.8;
-}
-
-/* Extra style for the cancel button (red) */
-.cancelbtn {
-  width: auto;
-  padding: 10px 18px;
-  background-color: #f44336;
 }
 
 /* Center the avatar image inside this container */
@@ -54,24 +43,10 @@ img.avatar {
 /* Add padding to containers */
 .container {
   padding: 16px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* The "Forgot password" text */
-span.psw {
-  float: right;
-  padding-top: 16px;
-}
-
-/* Change styles for span and cancel button on extra small screens */
-@media screen and (max-width: 300px) {
-  span.psw {
-    display: block;
-    float: none;
-  }
-  .cancelbtn {
-    width: 100%;
-  }
-}
 #histogram {
   position: relative;
   background: white;
@@ -251,75 +226,9 @@ path.leaflet-interactive {
   border-radius: 1.6rem;
 }
 
-.sidebar {
-  display:inline-block;
-  height: 100%; /* 100% Full-height */
-  width: 0; /* 0 width - change this with JavaScript */
-  position: fixed; /* Stay in place */
-  z-index: 1000; /* Stay on top */
-  top: 24%;
-  right: 0;
-  overflow-x: hidden; /* Disable horizontal scroll */
-  transition: 0.5s; /* 0.5 second transition effect to slide in the sidebar */
-}
-#alert-info {
-  text-align: center;
-  position: relative;
-  background-color:white;
-}
-.alert-title {
-  display: inline-block;
-  color: #FFF;
-  font-size: 20px;
-}
-.alert-type {
-  color: #1a6d6ee4;
-  text-align: left;
-  font-size: 20px;
-  padding: 1px 0px 0px 6px;
-  font-weight: 700;
-}
-.alert-location {
-  text-align: left;
-  padding: 1px 0px 0px 6px;
-  font-size: 14px;
-  color: #555;
-}
-
-.innerdiv {
-  display: flex;
-  background-color: #1a6d6ee4;
-  align-items: center;
-  padding: 5px 0px;
-}
-
 html {
   font-family: 'Noto Sans TC', sans-serif;
 }
-
-.alert-description {
-  color: #888;
-  font-size: 12px;
-  text-align: left;
-  padding: 0px 0px 0px 6px;
-}
-.closebtn {
-  font-size: 18px;
-  color:#FFF;
-  cursor: pointer;
-  width: 24px;
-  height: 24px;
-  display:flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  margin: 0px 10px 0px 5px;
-}
-
-.closebtn:hover { 
-  background: #fff7;
-}
-
 
 .openbtn {
   display: flex;
@@ -334,6 +243,95 @@ html {
   cursor: pointer;
 }
 
+.innerdiv {
+  display: flex;
+  align-items: center;
+  padding: 5px 0px;
+  background-color: #F0A202;
+  border-radius: 5px;
+}
+
+.closebtn {
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  font-size: 20px;
+  height: 1.5rem;
+  display: inline-block;
+  padding: 0px 8px 8px 8px;
+  transition: color 0.2s;
+}
+
+.closebtn:hover {
+  color: gray
+}
+
+.sidebar {
+  display:inline-block;
+  height: 100%; /* 100% Full-height */
+  width: 0; /* 0 width - change this with JavaScript */
+  right: 0;
+  overflow-x: hidden; /* Disable horizontal scroll */
+  transition: 0.5s; /* 0.5 second transition effect to slide in the sidebar */
+  z-index: 1000;
+  position: fixed;
+  top: 180px;
+  right: 25px;
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 2px 3px rgb(93, 93, 93);
+}
+#alert-info {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 50vh;
+}
+.alert-title {
+  display: inline-block;
+  color: #FFF;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(93,93,93);
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+  background-color: rgb(191, 191, 191);
+}
+.alert-type {
+  text-align: left;
+  font-size: 20px;
+  padding: 1px 0px 0px 6px;
+  margin-top: 8px;
+  margin-left: 8px;
+  color: #7e5400;
+  font-weight: bold;
+}
+
+.alert-location {
+  text-align: left;
+  padding: 1px 0px 0px 6px;
+  color: #555;
+  font-size: 0.8rem;
+  margin-left: 8px;
+}
+
+.alert-description {
+  color: #888;
+  font-size: 12px;
+  padding: 0px 0px 0px 6px;
+  margin: 5px 12px 12px 8px;
+  text-align: justify;
+}
+
+hr {
+  width: 220px;
+  margin-left: 8px;
+  background-color: black;
+}
 .map-legend-text{
   font-size: 1rem;
   font-weight: bold;
@@ -370,11 +368,11 @@ html {
   cursor: pointer;
 }
 .map-layer-inactive {
-  background-color: #229597b6;
+  background-color: #F0A202;
   transition: background-color 0.1s;
 }
 .map-layer-active {
-  background-color: #135051e4;
+  background-color: #7e5400;
   transition: background-color 0.1s;
 }
 

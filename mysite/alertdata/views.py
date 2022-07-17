@@ -20,17 +20,14 @@ def map(request):
     return render(request, 'map2.html')
 
 def monitor(request):
-    return render(request, 'monitor.html')
     if request.method == 'POST':
         uname = request.POST.get('uname')
         psw = request.POST.get('psw')
         if uname == os.getenv('MONITOR_NAME') and psw == os.getenv('MONITOR_PSW'):
-            print('[[[[[[[[[[[[[[[[[[', request.method)
             return render(request, 'monitor.html')
         else:
             context = {'state': 'incorrect password'}
             return render(request, 'signin.html', context)
-    print(']]]]]]]]', request.method)
     return render(request, 'signin.html')
 
 def monitorAlert(request):
