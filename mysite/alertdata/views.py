@@ -15,6 +15,7 @@ import calendar
 import datetime
 from django.conf import settings
 from django.shortcuts import redirect
+from django.views.decorators.csrf import csrf_exempt
 
 def map(request):
     return render(request, 'map2.html')
@@ -160,6 +161,7 @@ def renderParking(request):
     parking = df_parking.values.tolist()
     return HttpResponse(parking)
 
+@csrf_exempt
 def getData(request):
     if request.method == 'POST':
         data = request.body
