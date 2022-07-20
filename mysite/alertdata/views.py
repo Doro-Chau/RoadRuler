@@ -16,7 +16,9 @@ import datetime
 from django.conf import settings
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
 
+@ensure_csrf_cookie
 def map(request):
     return render(request, 'map2.html')
 
