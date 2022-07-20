@@ -198,7 +198,7 @@ class MonitorDaily(models.Model):
 
 class MonitorLogin(models.Model):
     user = models.CharField(primary_key=True, max_length=30)
-    password = models.CharField(max_length=30)
+    password = models.CharField(max_length=100)
 
     class Meta:
         managed = False

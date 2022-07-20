@@ -1,5 +1,5 @@
 from requests import request
-from .models import RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot, Construction, ConstructionCoor, TrafficLinkBroken, MonitorRealtime, MonitorDaily
+from .models import RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot, Construction, ConstructionCoor, TrafficLinkBroken, MonitorRealtime, MonitorDaily, MonitorLogin
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import os, io, json
@@ -17,16 +17,21 @@ from django.conf import settings
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import ensure_csrf_cookie
+from passlib.hash import sha256_crypt
 
 @ensure_csrf_cookie
 def map(request):
     return render(request, 'map2.html')
 
 def monitor(request):
+    hash = sha256_crypt.hash('358410018')
     if request.method == 'POST':
+        data = list(MonitorLogin.objects.all().values())
         uname = request.POST.get('uname')
         psw = request.POST.get('psw')
-        if uname == os.getenv('MONITOR_NAME') and psw == os.getenv('MONITOR_PSW'):
+        name = data[0]['user']
+        password = data[0]['password']
+        if uname == name and sha256_crypt.verify(psw, password):
             return render(request, 'monitor.html')
         else:
             context = {'state': 'incorrect password'}
@@ -139,7 +144,6 @@ def renderAlert(request):
     df_alert = df_alert[['location', 'event', 'description']]
     df_alert = df_alert.drop_duplicates()
     alert = df_alert.values.tolist()
-    print(df_alert)
     return HttpResponse(alert)
 
 def renderConstruction(reuest):
