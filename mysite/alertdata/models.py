@@ -196,6 +196,15 @@ class MonitorDaily(models.Model):
         db_table = 'monitor_daily'
 
 
+class MonitorLogin(models.Model):
+    user = models.CharField(primary_key=True, max_length=30)
+    password = models.CharField(max_length=30)
+
+    class Meta:
+        managed = False
+        db_table = 'monitor_login'
+
+
 class MonitorRealtime(models.Model):
     time = models.CharField(max_length=80, blank=True, null=True)
     average = models.IntegerField(blank=True, null=True)
