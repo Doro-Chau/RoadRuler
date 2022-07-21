@@ -24,7 +24,6 @@ def map(request):
     return render(request, 'map2.html')
 
 def monitor(request):
-    hash = sha256_crypt.hash('358410018')
     if request.method == 'POST':
         data = list(MonitorLogin.objects.all().values())
         uname = request.POST.get('uname')
@@ -89,7 +88,6 @@ def processmaplot(weekday, mondata):
 def maplot(request):
     # db.lot_history.delete_many({'update_time':{'$exists':0}})
     # db.lot_history.delete_many({'update_time':99999})
-    print(json.loads(request.body))
     lotid = json.loads(request.body)['lotid']
     if json.loads(request.body)['weekday'] != ('平日' or '假日'):
         weekday = json.loads(request.body)['weekday'][:3].capitalize()
