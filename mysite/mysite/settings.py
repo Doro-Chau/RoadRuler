@@ -1,8 +1,6 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import mimetypes
-mimetypes.add_type("text/css", ".css", True)
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -83,10 +81,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'myMap',
-        'USER': 'new_admin',
-        'PASSWORD': 'Dd13161613!',
-        'HOST': 'my-rds-instance.cnj6ula2gwye.us-west-2.rds.amazonaws.com',
-        'PORT': '3306',
+        'USER': os.getenv('SQL_USER'),
+        'PASSWORD': os.getenv('SQL_PWD'),
+        'HOST': os.getenv('SQL_HOST'),
+        'PORT': '3306'
     }
 }
 
