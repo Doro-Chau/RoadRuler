@@ -1,20 +1,12 @@
-from requests import request
 from .models import RealtimeAlert, AlertLocation, TrafficCctv, TrafficSection, TrafficLivecity, TrafficLivevd, TrafficLink, Parkinglot, Construction, ConstructionCoor, TrafficLinkBroken, MonitorRealtime, MonitorDaily, MonitorLogin
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import os, io, json
-import urllib
-from django.core.files.storage import default_storage
-from sympy import content
-from rest_framework.response import Response
 import boto3
 import xml.etree.ElementTree as ET
 import pandas as pd
 from pymongo import MongoClient
-import calendar
 import datetime
-from django.conf import settings
-from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import ensure_csrf_cookie
 from passlib.hash import sha256_crypt
