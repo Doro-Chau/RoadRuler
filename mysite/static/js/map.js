@@ -27,7 +27,7 @@ function closeNav() {
     document.getElementById("mySidebar").style.width = "0";
 }
 function getAlert(){
-    return fetch('/renderAlert')
+    return fetch('/render_alert')
     .then(res => res.text())
     .then(res2 => res2.split(/[,'\s\[\]]+/))
     .then(data => showAlert(data.slice(1, data.length-1)))
@@ -66,7 +66,7 @@ function showAlert(object){
 
 // construction
 function getConstruction(){
-    return fetch('/renderConstruction')
+    return fetch('/render_construction')
     .then(res => res.text())
     .then(res2 => res2.split(/[,'\s\[\]]+/))
     .then(data => showConstruction(data.slice(1, data.length-1)))
@@ -97,7 +97,7 @@ const days = [
 ]
 // 1. triggered and get data
 function getParking(){
-    return fetch('/renderParking')
+    return fetch('/render_parking')
     .then(res => res.text())
     .then(res2 => res2.split(/[,'\s\[\]]+/))
     .then(data => showParking(data.slice(1, data.length-1)))
@@ -300,7 +300,7 @@ function createSelect(){
 
 // CCTV
 function getCctv(){  
-    return fetch('/renderCctv')
+    return fetch('/render_cctv')
     .then(res => res.text())
     .then(res2 => res2.split(/[,'\s\[\]]+/))
     .then(data => showCctv(data.slice(1, data.length-1)))
@@ -336,7 +336,7 @@ function showCctv(object){
 
 // traffic
 function getLivevd(){
-    return fetch('/renderLivevd')
+    return fetch('/render_livevd')
     .then(res => res.text())
     .then(res2 => res2.split(/[,'\s\[\]]+/))
     .then(data => showLivevd(data.slice(1, data.length-1)))

@@ -1,5 +1,5 @@
 function getAlert(){
-    return fetch('/monitorAlert')
+    return fetch('/monitor_alert')
     .then(res => res.text())
     .then(res2 => res2.split(/[,'\s\[\]]+/))
     .then(data => showAlert(data.slice(1, data.length-1)))
@@ -110,13 +110,12 @@ function showAlert(object){
     barChart(barConfig)
 }
 function getRealtime(){
-    return fetch('/monitorRealtime')
+    return fetch('/monitor_realtime')
     .then(res => res.text())
     .then(res2 => res2.split(/[,'\s\[\]]+/))
     .then(res3 => res3.slice(1, res3.length-1))
     .then(res4 => toInt(res4))
     .then(data => showRealtime(data));
-    // .then(data => showRealtime(data.slice(1, data.length-1)))
 }
 function showRealtime(object){
     let realtimebarConfig = {
@@ -342,7 +341,7 @@ function renderLineConfig(xvalue, yvalue, yscale, title){
     return lineConfig
 }
 function getDaily(){
-    return fetch('/monitorDaily')
+    return fetch('/monitor_daily')
     .then(res => res.text())
     .then(res2 => res2.split(/[',\s\[\]]+/))
     .then(res3 => toInt(res3))

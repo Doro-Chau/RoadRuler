@@ -29,7 +29,7 @@ def monitor(request):
             return render(request, 'signin.html', context)
     return render(request, 'signin.html')
 
-def monitorAlert(request):
+def monitor_alert(request):
     df_alert = pd.DataFrame(list(RealtimeAlert.objects.all().values()))
     df_alert = df_alert[['sent', 'response']]
     df_alert.fillna('1', inplace=True)
@@ -37,12 +37,12 @@ def monitorAlert(request):
     alert[1] = [2 if 'sender' in x else 1 for x in alert[1]]
     return HttpResponse(alert)
 
-def monitorRealtime(request):
+def monitor_realtime(request):
     df_realtime = pd.DataFrame(list(MonitorRealtime.objects.all().values()))
     realtime = df_realtime.values.tolist()
     return HttpResponse(realtime)
 
-def monitorDaily(request):
+def monitor_daily(request):
     df_daily = pd.DataFrame(list(MonitorDaily.objects.all().values()))
     df_return = pd.DataFrame(columns=['date', 'cctv', 'park', 'vd'])
     for index, x in df_daily.iterrows():
@@ -100,14 +100,14 @@ def get_db_handle(db_name, host, port, username, password):
     db = client[db_name]
     return db, client
 
-def renderCctv(request):
+def render_cctv(request):
     cctv = pd.DataFrame(list(TrafficCctv.objects.all().values()))
     cctv = cctv.values.tolist()
     # cctv = TrafficCctv.objects.filter(videostreamurl__isnull=False).filter(positionlat__isnull=False).filter(positionlon__isnull=False)
     # cctv = [[x.cctvid, x.city, x.videostreamurl, x.positionlat, x.positionlon] for x in cctv]
     return HttpResponse(cctv)
 
-def renderLivevd(request):
+def render_livevd(request):
     df_livevd = pd.DataFrame(list(TrafficLivevd.objects.all().values()))
     df_link = pd.DataFrame(list(TrafficLink.objects.all().values()))
     df_livevd.rename(columns={'linkid_id':'linkid'}, inplace=True)
@@ -120,7 +120,7 @@ def renderLivevd(request):
     merge = df_merge.values.tolist()
     return HttpResponse(merge)
 
-def renderLivecity(request):
+def render_livecity(request):
     df_livecity = pd.DataFrame(list(TrafficLivecity.objects.all().values()))
     df_section = pd.DataFrame(list(TrafficSection.objects.all().values()))
     df_livecity.rename(columns={'sectionid_id':'sectionid'}, inplace=True)
@@ -129,14 +129,14 @@ def renderLivecity(request):
     merge = df_merge.values.tolist()
     return HttpResponse(merge)
 
-def renderAlert(request):
+def render_alert(request):
     df_alert = pd.DataFrame(list(AlertLocation.objects.filter(expires__gt=(datetime.datetime.now()+datetime.timedelta(hours=8)), location__contains = '臺北').values()))
     df_alert = df_alert[['location', 'event', 'description']]
     df_alert = df_alert.drop_duplicates()
     alert = df_alert.values.tolist()
     return HttpResponse(alert)
 
-def renderConstruction(reuest):
+def render_construction(reuest):
     df_construction = pd.DataFrame(list(Construction.objects.all().values()))
     df_construction_coor = pd.DataFrame(list(ConstructionCoor.objects.all().values()))
     df_construction_coor.rename(columns={'facility_no_id':'facility_no'}, inplace=True)
@@ -146,7 +146,7 @@ def renderConstruction(reuest):
     merge = df_merge.values.tolist()
     return HttpResponse(merge)
 
-def renderParking(request):
+def render_parking(request):
     df_parking = pd.DataFrame(list(Parkinglot.objects.all().values()))
     df_parking = df_parking[['id', 'name', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon']]
     df_parking[df_parking['availablecar']!='無提供資料'] = df_parking[df_parking['availablecar']!='無提供資料'].astype({"availablecar": float})
