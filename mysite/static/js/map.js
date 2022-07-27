@@ -84,7 +84,6 @@ function getAlert(){
     .then(data => showAlert(data.slice(1, data.length-1)))
 }
 function showAlert(object){
-    console.log(object);
     const innerDiv = document.createElement('div');
     const mySidebar = document.getElementById('mySidebar')
     innerDiv.className = 'innerdiv';
@@ -101,7 +100,6 @@ function showAlert(object){
     innerDiv.appendChild(alerttitle);
     const alertinfo = document.createElement("section")
     alertinfo.id = "alert-info"
-    console.log(alertinfo)
     for (let i=0; i<object.length; i+=3){
         var text = document.createElement('div');
         text.innerHTML = `
@@ -126,7 +124,6 @@ function getConstruction(){
 }
 var markers_construction = L.layerGroup();
 function showConstruction(object){
-    console.log(object);
     if (mymap.hasLayer(markers_construction)){
         mymap.removeLayer(markers_construction);
     }
@@ -204,7 +201,6 @@ async function renderHistogram(e, parkingInfo){
 
 function getCookie(name) {
     let cookieValue = null;
-    console.log(document.cookie=='');
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
