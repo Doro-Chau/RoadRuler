@@ -158,7 +158,7 @@ def render_parking(request):
     return HttpResponse(parking)
 
 @csrf_exempt
-def getData(request):
+def get_data(request):
     if request.method == 'POST':
         data = request.body
         file = io.BytesIO(data)
