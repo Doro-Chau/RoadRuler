@@ -5,59 +5,8 @@ var tiles = L.tileLayer('https://tile.jawg.io/2da962d1-5c31-4de7-af98-cb2707b595
 mymap.attributionControl.addAttribution("<a href=\"https://www.jawg.io\" target=\"_blank\">&copy; Jawg</a> - <a href=\"https://www.openstreetmap.org\" target=\"_blank\">&copy; OpenStreetMap</a>&nbsp;contributors")
 let timerId = 0;
 
-// locate current position
-// var lc = L.control.locate({
-//     position: 'topright',
-//     strings: {
-//         title: "Show me where I am, yo!"
-//     },
-//     setView: 'always',
-//     locateOptions:{
-//         enableHighAccuracy: true
-//     }
-// }).addTo(mymap);
-// lc.start();
-
-// search function (navigator to be add)
+// search function
 L.Control.geocoder().addTo(mymap);
-
-function getPosition(value){
-    console.log(value);
-}
-
-// self made navigation bar
-// var form = document.getElementById('form');
-// var destination = document.getElementById('destination');
-// form.addEventListener('submit', (e) => {
-//     console.log("submit")
-//     e.preventDefault();
-//     try{
-//         var value = destination.value.split(',');
-//         value = value.map(Number);
-//         L.marker(value).addTo(mymap);
-//     }
-//     catch{
-//         $.ajax({
-//             url: '/map',
-//             type: 'POST',
-//             contentType: 'application/json',
-//             data: $("#destination"),
-//             success: function(){
-//                 console.log('success')
-//             },
-//             error: function(){
-//                 console.log('error')
-//             }
-//         });
-//     }
-    
-//     navigator.geolocation.watchPosition(position => {
-//         console.log(position);
-//         var start = [position.coords.latitude, position.coords.longitude];
-//         console.log(start[0], start[1], value[0], value[1]);
-//         roadplan(start, value);
-//     });
-// })
 
 // road planning
 function roadplan(start, end){
@@ -69,7 +18,7 @@ function roadplan(start, end){
     }).addTo(mymap);
 }
 
-// 示警
+// alert
 function openNav() {
     document.getElementById("mySidebar").style.width = "250px";
     getAlert();    
@@ -115,28 +64,28 @@ function showAlert(object){
     mySidebar.appendChild(alertinfo)
 }
 
-// 施工
+// construction
 function getConstruction(){
     return fetch('/renderConstruction')
     .then(res => res.text())
     .then(res2 => res2.split(/[,'\s\[\]]+/))
     .then(data => showConstruction(data.slice(1, data.length-1)))
 }
-var markers_construction = L.layerGroup();
+var markersConstruction = L.layerGroup();
 function showConstruction(object){
-    if (mymap.hasLayer(markers_construction)){
-        mymap.removeLayer(markers_construction);
+    if (mymap.hasLayer(markersConstruction)){
+        mymap.removeLayer(markersConstruction);
     }
     else{
         for (let i=0; i< object.length; i+=6){
             let popup = "<dd>施工單位： " + object[i] + "</dd><dd>施工期間： " + object[i+1] + "-" + object[i+2] + "</dd><dd>每日施工時間： " + object[i+3] + "</dd>";
-            markers_construction.addLayer(L.circle([object[i+4], object[i+5]], {radius: 6.5}).bindPopup(popup)).addTo(mymap);
-            mymap.addLayer(markers_construction);
+            markersConstruction.addLayer(L.circle([object[i+4], object[i+5]], {radius: 6.5}).bindPopup(popup)).addTo(mymap);
+            mymap.addLayer(markersConstruction);
         }
     }
 }
 
-// 停車場
+// parking space
 const days = [
     {value:"sunday",text:"Sunday"},
     {value:"monday",text:"Monday"},
@@ -146,21 +95,21 @@ const days = [
     {value:"friday",text:"Friday"},
     {value:"saturday",text:"Saturday"},
 ]
-// 1. 被觸發，拿資料
+// 1. triggered and get data
 function getParking(){
     return fetch('/renderParking')
     .then(res => res.text())
     .then(res2 => res2.split(/[,'\s\[\]]+/))
     .then(data => showParking(data.slice(1, data.length-1)))
 }
-var markers_parking = L.markerClusterGroup();
-// 2. 點標出來、導向 renderhistogram
+var markersParking = L.markerClusterGroup();
+// 2. mark and renderhistogram
 function showParking(object){
-    if (mymap.hasLayer(markers_parking)){
-        mymap.removeLayer(markers_parking);
+    if (mymap.hasLayer(markersParking)){
+        mymap.removeLayer(markersParking);
     }
     else{
-        markers_parking = L.markerClusterGroup();
+        markersParking = L.markerClusterGroup();
         for (let i=0; i<object.length; i+=6){
             // var popup = "<dd id='lotid'>" + object[i] + "</dd><dd>" + object[i+1] + "</dd><dd>" + object[i+2] + "</dd><dd>" + object[i+3] + "</dd>'<div id='histogram'></div>'";
             const popup ="<div id='histogram'></div>";
@@ -168,12 +117,12 @@ function showParking(object){
             const myIcon = L.icon({
                 iconUrl: 'static/css/images/parking-pin.svg'
             });
-            markers_parking.addLayer(L.marker([object[i+4], object[i+5]], { icon: myIcon })
+            markersParking.addLayer(L.marker([object[i+4], object[i+5]], { icon: myIcon })
             .bindPopup(popup)
             .on('popupopen', (e)=>{renderHistogram(e, parkingInfo)})
             .on('popupclose', deleteid)
             );
-        mymap.addLayer(markers_parking);
+        mymap.addLayer(markersParking);
         }
     }
 }
@@ -231,7 +180,6 @@ function getHistogramData(lotid, weekday){
 }
 
 function histogram(x, lotid, parkingInfo){
-    console.log(x)
     if (x.length>0){
         var trace = {
             x: x,
@@ -265,7 +213,6 @@ async function updateHistogramData(lotid, weekday){
     const data = await getHistogramData(lotid, weekday);
     const {lot} = data;
     if (!lot) return
-    console.log(lot[Object.keys(lot)[0]])
     const trace = [{
         x: lot[Object.keys(lot)[0]],
         type: 'histogram',
@@ -351,7 +298,7 @@ function createSelect(){
     })
 }
 
-// 監控畫面
+// CCTV
 function getCctv(){  
     return fetch('/renderCctv')
     .then(res => res.text())
@@ -359,27 +306,20 @@ function getCctv(){
     .then(data => showCctv(data.slice(1, data.length-1)))
 }
 
-// var markers_cctv = L.markerClusterGroup();
-var markers_cctv = L.markerClusterGroup({
+var markersCctv = L.markerClusterGroup({
 	iconCreateFunction: function(cluster) {
-        var markers = cluster.getAllChildMarkers();
-        // '<div class="circle">' + markers.length + '</div><div>'
         var html = '<b>' + cluster.getChildCount() + '</b>';
-        // console.log(markers);
 		return L.divIcon({html: html});
 	}
 });
 function showCctv(object){
-    if (mymap.hasLayer(markers_cctv)){
-        mymap.removeLayer(markers_cctv);
+    if (mymap.hasLayer(markersCctv)){
+        mymap.removeLayer(markersCctv);
         return;
     }
-    markers_cctv = L.markerClusterGroup({
+    markersCctv = L.markerClusterGroup({
         iconCreateFunction: function(cluster) {
-            var markers = cluster.getAllChildMarkers();
-            // '<div class="circle">' + markers.length + '</div><div>'
             var html = '<b>' + cluster.getChildCount() + '</b>';
-            // console.log(markers);
             return L.divIcon({html: html});
         }
     });
@@ -388,40 +328,40 @@ function showCctv(object){
         const myIcon = L.icon({
             iconUrl: 'static/css/images/videocam-pin.svg'
         });
-        markers_cctv.addLayer(L.marker([object[i+4], object[i+3]], { icon: myIcon }).bindPopup(popup)).addTo(mymap);
-        mymap.addLayer(markers_cctv);
+        markersCctv.addLayer(L.marker([object[i+4], object[i+3]], { icon: myIcon }).bindPopup(popup)).addTo(mymap);
+        mymap.addLayer(markersCctv);
     }
 }
 
 
-// 壅塞狀況
+// traffic
 function getLivevd(){
     return fetch('/renderLivevd')
     .then(res => res.text())
     .then(res2 => res2.split(/[,'\s\[\]]+/))
     .then(data => showLivevd(data.slice(1, data.length-1)))
 }
-var markers_vd = L.markerClusterGroup();
+var markersVd = L.markerClusterGroup();
 function showLivevd(object){
-    if (mymap.hasLayer(markers_vd)){
-        mymap.removeLayer(markers_vd);
+    if (mymap.hasLayer(markersVd)){
+        mymap.removeLayer(markersVd);
     }
     else{
         for (var i=0; i<object.length; i+=9){
             if (object[i+2] > 60){
-                markers_vd.addLayer(L.polyline([[object[i+4], object[i+3]], [object[i+6], object[i+5]], [object[i+8], object[i+7]]], {color:'green'})).addTo(mymap);
+                markersVd.addLayer(L.polyline([[object[i+4], object[i+3]], [object[i+6], object[i+5]], [object[i+8], object[i+7]]], {color:'green'})).addTo(mymap);
             }
             else if (40 < object[i+2] < 60){
-                markers_vd.addLayer(L.polyline([[object[i+4], object[i+3]], [object[i+6], object[i+5]], [object[i+8], object[i+7]]], {color:'orange'})).addTo(mymap);
+                markersVd.addLayer(L.polyline([[object[i+4], object[i+3]], [object[i+6], object[i+5]], [object[i+8], object[i+7]]], {color:'orange'})).addTo(mymap);
             }
             else if (0< object[i+2] < 40){
-                markers_vd.addLayer(L.polyline([[object[i+4], object[i+3]], [object[i+6], object[i+5]], [object[i+8], object[i+7]]], {color:'red'})).addTo(mymap);
+                markersVd.addLayer(L.polyline([[object[i+4], object[i+3]], [object[i+6], object[i+5]], [object[i+8], object[i+7]]], {color:'red'})).addTo(mymap);
             }
             else{
-                markers_vd.addLayer(L.polyline([[object[i+4], object[i+3]], [object[i+6], object[i+5]], [object[i+8], object[i+7]]])).addTo(mymap);
+                markersVd.addLayer(L.polyline([[object[i+4], object[i+3]], [object[i+6], object[i+5]], [object[i+8], object[i+7]]])).addTo(mymap);
             }
         }
-        mymap.addLayer(markers_vd);
+        mymap.addLayer(markersVd);
     }
 }
 

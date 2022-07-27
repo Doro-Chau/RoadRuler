@@ -13,7 +13,6 @@ input[type=text], input[type=password] {
   display: inline-block;
 }
 
-/* Set a style for all buttons */
 .container button {
   background-color: #F0A202;
   color: white;
@@ -29,7 +28,7 @@ input[type=text], input[type=password] {
 }
 
 /* Center the avatar image inside this container */
-.imgcontainer {
+.img-container {
   text-align: center;
   margin: 24px 0 12px 0;
 }
