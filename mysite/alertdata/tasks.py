@@ -11,7 +11,6 @@ from django.http import HttpResponse
 #from models import Construction, ConstructionCoor, Parkinglot, TrafficLink, TrafficLinkBroken, TrafficLivevd, TrafficCctv
 import pandas as pd
 from pymongo import MongoClient
-import bson
 import datetime
 
 def get_db_handle(db_name, host, port, username, password):
@@ -19,7 +18,7 @@ def get_db_handle(db_name, host, port, username, password):
     db = client[db_name]
     return db, client
 
-def storeDaily():
+def store_daily():
     cctv_amount = len(list(models.TrafficCctv.objects.all().values()))
     db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
     lot_amount = db.lot_history.count_documents({})
@@ -29,7 +28,7 @@ def storeDaily():
     b.save()
     return 'success'
 
-def storeRealtime():
+def store_realtime():
     bulk_update = []
     park_amount = len(list(models.Parkinglot.objects.all().values()))
     vd_amount = len(list(models.TrafficLivevd.objects.all().values()))
@@ -51,7 +50,7 @@ def storeRealtime():
     return 'success'
 
 
-def getConstruction():
+def get_construction():
     models.ConstructionCoor.objects.all().delete()
     models.Construction.objects.all().delete()
     url = "https://tpnco.blob.core.windows.net/blobfs/Todaywork.json"
@@ -80,7 +79,7 @@ def getConstruction():
     return response
 
 
-def getParking():
+def get_parking():
     bulk_create = []
     bulk_update = []
     exist_id = models.Parkinglot.objects.values_list('id', flat = True)
@@ -143,7 +142,7 @@ def getParking():
     models.Parkinglot.objects.bulk_update(bulk_update, ['update_time', 'area', 'name', 'summary', 'address', 'payex', 'servicetime', 'totalcar', 'availablecar', 'entrancelat', 'entrancelon'])
     return response
 
-def getLiveVD():
+def get_liveVD():
     db, client = get_db_handle('traffic', os.getenv('MONGO_HOST'), 27017, os.getenv('MONGO_USERNAME'), os.getenv('MONGO_PWD'))
     collection = db['vd_history']
     # information to be store or update
@@ -158,7 +157,7 @@ def getLiveVD():
     existing_link = models.TrafficLivevd.objects.values_list('linkid', flat = True)
     
     url_liveVD = 'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/Live/VD/City/Taipei'
-    data_liveVD = json.loads(getApiResponse(url_liveVD).content.decode("utf-8"))
+    data_liveVD = json.loads(get_api_response(url_liveVD).content.decode("utf-8"))
     update_time = data_liveVD['UpdateTime']
     for vdlive in data_liveVD['VDLives']:
         for linkflow in vdlive['LinkFlows']:
@@ -172,7 +171,7 @@ def getLiveVD():
                 # 2. 可行性：link id 不在現有 link id 中，要另外爬
                 elif linkflow['LinkID'] not in storable_link:
                     url_link = f'https://tdx.transportdata.tw/api/basic/v2/Road/Link/LinkID/{linkflow["LinkID"]}'
-                    getLink(url_link, linkflow['LinkID'])
+                    get_link(url_link, linkflow['LinkID'])
                 # 3. update or create
                 elif linkflow['LinkID'] not in existing_link:
                     bulk_create.append([update_time, vdlive['VDID'], linkflow['LinkID'], lane['Speed']])
@@ -204,15 +203,13 @@ def getLiveVD():
                 at.speed = x['Speed']
                 bulk_update_list.append(at)
     models.TrafficLivevd.objects.bulk_update(bulk_update_list, ['update_time', 'speed'])    
-    return getApiResponse(url_liveVD)
+    return get_api_response(url_liveVD)
 
-def getLink(url, LinkID):
+def get_link(url, LinkID):
     already_insert = models.TrafficLinkBroken.objects.values_list('linkid', flat = True)
     url_link = url
-    insert_list = []
-    linkid = []
     try:
-        data_link = json.loads(getApiResponse(url_link).content.decode("utf-8"))
+        data_link = json.loads(get_api_response(url_link).content.decode("utf-8"))
     except:
         data_link = []
         
@@ -221,12 +218,12 @@ def getLink(url, LinkID):
         insert.save()
     elif LinkID not in already_insert:
         models.TrafficLinkBroken.objects.create(linkid=LinkID)
-    return getApiResponse(url_link)
+    return get_api_response(url_link)
 
 
-def getCCTV():
+def get_CCTV():
     url_CCTV = 'https://tdx.transportdata.tw/api/basic/v2/Road/Traffic/CCTV/City/Taipei'
-    data_CCTV = json.loads(getApiResponse(url_CCTV).content.decode("utf-8"))
+    data_CCTV = json.loads(get_api_response(url_CCTV).content.decode("utf-8"))
     cctvid = models.TrafficCctv.objects.values_list('cctvid', flat = True)
     update_time = data_CCTV['UpdateTime']
     bulk_create = []
@@ -248,9 +245,9 @@ def getCCTV():
 
     models.TrafficCctv.objects.bulk_create(bulk_create)
     models.TrafficCctv.objects.bulk_update(bulk_update, ['update_time', 'videostreamurl', 'positionlat', 'positionlon', 'roadname'])  
-    return getApiResponse(url_CCTV)
+    return get_api_response(url_CCTV)
 
-def getAuthorizationHeader():
+def get_authorization_header():
     url = 'https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token'
     header = {"content-type":"application/x-www-form-urlencoded"}
     data = {
@@ -262,8 +259,8 @@ def getAuthorizationHeader():
         return r.json()['access_token']
     return HttpResponse(json.dumps({'token': r}))
 
-def getApiResponse(url):
-    token = getAuthorizationHeader()
+def get_api_response(url):
+    token = get_authorization_header()
     headers = {'authorization': f'Bearer {token}'}
     response = requests.get(url, headers = headers)
     return HttpResponse(response)

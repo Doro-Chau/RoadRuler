@@ -142,7 +142,6 @@ def render_construction(reuest):
     df_construction_coor.rename(columns={'facility_no_id':'facility_no'}, inplace=True)
     df_merge = df_construction.merge(df_construction_coor, how='inner', on='facility_no')
     df_merge = df_merge[['contractor', 'construction_begin', 'construction_end', 'construction_timezone', 'lat', 'lon']]
-    print(df_merge)
     merge = df_merge.values.tolist()
     return HttpResponse(merge)
 
