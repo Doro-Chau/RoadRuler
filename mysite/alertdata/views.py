@@ -9,7 +9,6 @@ from .models import (
     Parkinglot,
     Construction,
     ConstructionCoor,
-    TrafficLinkBroken,
     MonitorRealtime,
     MonitorDaily,
     MonitorLogin,
@@ -131,8 +130,6 @@ def processmaplot(weekday, mondata):
 
 
 def maplot(request):
-    # db.lot_history.delete_many({'update_time':{'$exists':0}})
-    # db.lot_history.delete_many({'update_time':99999})
     lotid = json.loads(request.body)["lotid"]
     if json.loads(request.body)["weekday"] != ("平日" or "假日"):
         weekday = json.loads(request.body)["weekday"][:3].capitalize()
@@ -166,8 +163,6 @@ def get_db_handle(db_name, host, port, username, password):
 def render_cctv(request):
     cctv = pd.DataFrame(list(TrafficCctv.objects.all().values()))
     cctv = cctv.values.tolist()
-    # cctv = TrafficCctv.objects.filter(videostreamurl__isnull=False).filter(positionlat__isnull=False).filter(positionlon__isnull=False)
-    # cctv = [[x.cctvid, x.city, x.videostreamurl, x.positionlat, x.positionlon] for x in cctv]
     return HttpResponse(cctv)
 
 
@@ -262,9 +257,6 @@ def get_data(request):
     if request.method == "POST":
         data = request.body
         file = io.BytesIO(data)
-        # workpath = os.path.dirname(os.path.abspath(__file__))
-        # filename = default_storage.save(workpath, file)
-
         workpath = "mymap/realtime_alert/"
         now = datetime.datetime.now()
         time_del = datetime.timedelta(hours=8)
@@ -290,40 +282,41 @@ def get_data(request):
         RealtimeAlert.objects.create(**dict_alert)
 
         for child in root:
-            if len(child) != 0:
-                alert_id = RealtimeAlert.objects.latest("alert_id").alert_id
-                dict_location = {}
-                dict_location["alert"] = RealtimeAlert.objects.latest("alert_id")
-                for i in range(len(child)):
-                    if len(child[i]) == 0:
-                        dict_location[child[i].tag[38:]] = child[i].text
-                    else:
-                        for j in range(len(child[i])):
-                            if (child[i][j].tag[38:] != "valueName") & (
-                                child[i][j].tag[38:] != "value"
-                            ):
-                                dict_location[child[i][j].tag[38:]] = child[i][j].text
-                                try:
-                                    dict_location["location"] = dict_location[
-                                        "areaDesc"
-                                    ]
-                                except:
-                                    pass
-                            elif child[i][j].tag[38:] == "valueName":
-                                dict_location[child[i][j].text] = child[i][j + 1].text
-                            if "location" in dict_location and j == 1:
-                                dict_location = {
-                                    k.lower(): v for k, v in dict_location.items()
-                                }
-                                column_name = [
-                                    x.name for x in AlertLocation._meta.get_fields()
-                                ]
-                                dict_location = {
-                                    x: dict_location[x]
-                                    for x in dict_location.keys()
-                                    if x in column_name
-                                }
-                                AlertLocation.objects.create(**dict_location)
+            if len(child) == 0:
+                continue
+            alert_id = RealtimeAlert.objects.latest("alert_id").alert_id
+            dict_location = {}
+            dict_location["alert"] = RealtimeAlert.objects.latest("alert_id")
+            for i in range(len(child)):
+                if len(child[i]) == 0:
+                    dict_location[child[i].tag[38:]] = child[i].text
+                    continue
+                for j in range(len(child[i])):
+                    if (child[i][j].tag[38:] != "valueName") & (
+                        child[i][j].tag[38:] != "value"
+                    ):
+                        dict_location[child[i][j].tag[38:]] = child[i][j].text
+                        try:
+                            dict_location["location"] = dict_location[
+                                "areaDesc"
+                            ]
+                        except:
+                            pass
+                    elif child[i][j].tag[38:] == "valueName":
+                        dict_location[child[i][j].text] = child[i][j + 1].text
+                    if "location" in dict_location and j == 1:
+                        dict_location = {
+                            k.lower(): v for k, v in dict_location.items()
+                        }
+                        column_name = [
+                            x.name for x in AlertLocation._meta.get_fields()
+                        ]
+                        dict_location = {
+                            x: dict_location[x]
+                            for x in dict_location.keys()
+                            if x in column_name
+                        }
+                        AlertLocation.objects.create(**dict_location)
         str = (
             '<?xml version="1.0" encoding="utf-8" ?> <Data><Status>{0}</Status></Data>'
         )
