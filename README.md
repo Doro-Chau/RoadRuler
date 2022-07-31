@@ -26,27 +26,6 @@ Road Ruler is a **road condition monitor** that improves driving security and co
 ## Architecture
 ![Architecture](https://imgur.com/lMcTame.png)
 
-## Features
-
-### CCTV
-
-<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/whiteboard.gif">
-
-### Traffic
-
-<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/call.gif">
-
-### Parking Lot
-
-<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/home.gif">
-
-### Construction
-
-<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/room.gif">
-
-### Alert Information
-
-<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/dashboard.gif">
 
 ## Technology
 ### Data Pipeline
@@ -63,52 +42,11 @@ Road Ruler is a **road condition monitor** that improves driving security and co
 - CSS
 - AJAX
 ### Cloud Service
-- AWS EC2
-- AWS RDS
-- AWS S3
-### Test
-- Pytest
-
-
-## Database Schema
-
-
-
-### Backend
-
-- Linux
-- Node.js / Express.js
-- RESTful API
-- NGINX
-
-
-### Cloud Service (AWS)
-
 - Elastic Compute Cloud (EC2)
 - Simple Storage Service (S3)
 - Relational Database Service (RDS)
-- CloudFront
-
-
-### Networking
-
-- HTTP & HTTPS
-- Domain Name System
-
-
-
-### Others
-
-- Design Pattern: MVC
-- Version Control: Git, GitHub
-- Agile: Trello (Scrum)
-
-
-## Architecture
-
-![Architecture](https://d3qwsmjvue1mmx.cloudfront.net/readme/architecture.png)
-
-
+### Test
+- Pytest
 
 
 ## Contact
