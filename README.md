@@ -1,39 +1,78 @@
+<div align="center">
+
 # Road Ruler
-# [TutorDraw](https://tutordraw.xyz/) 
+  
+Road Ruler is a **road condition monitor** that improves driving security and convenience.<br />
+[Getting started](#getting-started) •
+[Data Pipeline](#data-pipeline) •
+[Architecture](#architecture) •
+[Features](#features) •
+[Database Schema](#database-schema) •
+[Technology](#technology) •
+[Contact](#contact)
+</div>
 
-A real-time online virtual classroom providing more powerful tools for tutoring including co-editing whiteboards (creating lines, shapes, images, texts, post-its), chat rooms, video calls, and dashboards.
+## Getting Started
+![Cover](https://imgur.com/dCBFSor.png)
+#### Website URL: [https://roadruler.tw](https://roadruler.tw)
+#### Monitor URL: [https://roadruler.tw/monitor](https://roadruler.tw/monitor)
+- Monitor Account
+  - username: dorothy
+  - password: 358410018
 
-#### Website URL: [tutordraw.xyz](https://tutordraw.xyz/)
+## Data Pipeline
+![Pipeline](https://imgur.com/AhBh9JT.png)
 
-#### Test Accounts:
+## Architecture
+![Architecture](https://imgur.com/lMcTame.png)
 
-- Teacher
-  - email: teacher<span>@mail.com</span>
-  - password: aaaa1234
+## Features
 
-- Student
-  - email: student<span>@mail.com</span>
-  - password: aaaa1234
+### CCTV
 
-#### One-Click Login:
+<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/whiteboard.gif">
 
-Type email and password automatically when sign in
+### Traffic
 
-  - [Teacher](https://tutordraw.xyz/?test=teacher)
-  - [Student](https://tutordraw.xyz/?test=student)
+<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/call.gif">
 
-<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/intro.gif">
+### Parking Lot
 
-## Table of Contents
+<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/home.gif">
 
-- [Technologies](#Technologies)
-- [Architecture](#Architecture)
-- [Database Schema](#Database-Schema)
-- [Features](#Features)
-- [Demonstration](#Demonstration)
-- [Contact](#Contact)
+### Construction
 
-## Technologies
+<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/room.gif">
+
+### Alert Information
+
+<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/dashboard.gif">
+
+## Technology
+### Data Pipeline
+- Airflow
+### Database
+- MySQL
+- MongoDB
+### Backend
+- Nginx
+- Django
+### Frontend
+- HTML
+- JavaScript
+- CSS
+- AJAX
+### Cloud Service
+- AWS EC2
+- AWS RDS
+- AWS S3
+### Test
+- Pytest
+
+
+## Database Schema
+
+
 
 ### Backend
 
@@ -42,13 +81,6 @@ Type email and password automatically when sign in
 - RESTful API
 - NGINX
 
-### Front-end
-
-- HTML
-- CSS
-- JavaScript
-- Bootstrap
-- AJAX
 
 ### Cloud Service (AWS)
 
@@ -57,27 +89,13 @@ Type email and password automatically when sign in
 - Relational Database Service (RDS)
 - CloudFront
 
-### Database
-
-- MySQL
-
-### WebSocket
-
-- <span>Socket.IO</span>
-
-### WebRTC
-
-- PeerJS
 
 ### Networking
 
 - HTTP & HTTPS
 - Domain Name System
 
-### Test
 
-- Mocha
-- Chai
 
 ### Others
 
@@ -90,37 +108,11 @@ Type email and password automatically when sign in
 
 ![Architecture](https://d3qwsmjvue1mmx.cloudfront.net/readme/architecture.png)
 
-## Database Schema
-
-![Database Design](https://d3qwsmjvue1mmx.cloudfront.net/readme/ERD.png)
 
 
-## Features
-
-### Whiteboard
-
-<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/whiteboard.gif">
-
-### Video call
-
-<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/call.gif">
-
-## Demonstration
-
-### Home
-
-<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/home.gif">
-
-### Room
-
-<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/room.gif">
-
-### Dashboard
-
-<img src="https://d3qwsmjvue1mmx.cloudfront.net/readme/dashboard.gif">
 
 ## Contact
 
-<a href="https://github.com/TimMKChang" target="_blank">Tim Chang</a>
+<a href="https://github.com/Doro-Chau" target="_blank">Dorothy Chao</a>
 
-Email: b00501007@gmail.com
+Email: dorothychau1316@gmail.com
