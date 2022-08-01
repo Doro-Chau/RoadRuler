@@ -27,10 +27,16 @@ Road Ruler is a **road condition monitor** that improves driving security and co
 ![Architecture](https://imgur.com/lMcTame.png)
 
 ## Features
+### CCTV
+![CCTV](https://user-images.githubusercontent.com/58772413/182063789-3f5be02f-3b8e-4279-a4a5-d9700d195011.gif)
 ### Traffic
 ![](https://i.imgur.com/Ye1RBk8.gif)
+### Parking Space
+![lot](https://user-images.githubusercontent.com/58772413/182065702-3401cc9d-10e7-42c0-bb12-3a62cbe315f8.gif)
 ### Construction
 ![](https://i.imgur.com/mrJSpAZ.gif)
+### Alert
+![](https://imgur.com/KGJMYFW.gif)
 
 
 ## Database Schema
