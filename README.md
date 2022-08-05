@@ -40,7 +40,7 @@ Road Ruler is a **road condition monitor** that improves driving security and co
 
 
 ## Database Schema
-![Schema](https://imgur.com/LeXCfVd.png)
+![Schema](https://imgur.com/7zy7lKw.png)
 
 ## Technology
 ### Data Pipeline
